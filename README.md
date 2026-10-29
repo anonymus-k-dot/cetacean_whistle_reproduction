@@ -41,7 +41,7 @@ preprocessing_checks/<run_id>/   small check runs with full debug detail (never 
 python -m pytest                                   # all automated tests
 python whistle.py list-sets                        # validation sets (val1/val5/val10 from encounter 191, per_encounter) + files per encounter
 python whistle.py build-backgrounds                # real-background banks for synthetic training (S1-S3 on 56 non-validation files)
-python whistle.py train --version ridgenet-v1      # train S5 on SYNTHETIC data (checkpoints are never overwritten)
+python whistle.py train --version ridgenet-v1      # train S5 on SYNTHETIC data (checkpoints are never overwritten; --resume continues after an interruption)
 python whistle.py eval-synth --split val --calibrate   # synthetic validation + threshold calibration
 python whistle.py eval-synth --split test              # synthetic test
 python whistle.py build-manifest                   # once: hash every raw file -> metadata/manifest_all.csv (never overwritten;

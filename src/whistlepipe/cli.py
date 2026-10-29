@@ -129,7 +129,7 @@ def cmd_train(args) -> int:
 
     cfg = load_pipeline_config(args.config)
     dcfg = load_detector_config(overrides=args.override)
-    train_detector(cfg, dcfg, version=args.version)
+    train_detector(cfg, dcfg, version=args.version, resume=args.resume)
     return 0
 
 
@@ -273,6 +273,7 @@ def main(argv=None) -> int:
     t = sub.add_parser("train", help="train the S5 detector on synthetic data")
     t.add_argument("--version", default="ridgenet-v1")
     t.add_argument("--override", action="append", default=[], help="detector config override")
+    t.add_argument("--resume", action="store_true", help="save the training state every 250 steps and continue from it after an interruption")
     t.set_defaults(fn=cmd_train)
 
     e = sub.add_parser("eval-synth", help="evaluate/calibrate on SYNTHETIC validation/test data")
