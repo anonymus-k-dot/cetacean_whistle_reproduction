@@ -1,0 +1,30 @@
+{
+  "version": "ridgenet-5-24",
+  "checkpoint_sha256": "6636c9f6728d7ecaec418f27edceb230d9adedb7e366deb35bcb265ae98021dd",
+  "best_val_node_f1": 0.5594068521788109,
+  "n_params": 14209,
+  "detector_config_hash": "73c30a95ef34c8272cd81eaa77dbb534d0abaa6098662347c9acdb55d8a81a00",
+  "pipeline_config_hash": "5ae9505eec9db077abe786f9140424d4a72f149063f915ad82b58644cfaff981",
+  "seed": 20261008,
+  "steps": 6000,
+  "batch_size": 16,
+  "train_wall_s": 6070.4,
+  "software": {
+    "python": "3.13.16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+    "numpy": "2.1.3",
+    "scipy": "1.16.3",
+    "soundfile": "0.14.0",
+    "libsndfile": "1.2.2",
+    "git_commit": "63e11aef94a5099578aba873f43f1de08dba6006",
+    "git_uncommitted_code_changes": false,
+    "code_bundle_created_utc": "2026-10-29T14:22:28Z",
+    "torch": "2.11.0+cu130",
+    "cuda_available": true,
+    "tf32_conv_allowed": false,
+    "tf32_matmul_allowed": false,
+    "deterministic_algorithms": true,
+    "cuda_device": "Tesla T4"
+  },
+  "note": "trained on SYNTHETIC data only; node F1 here is a synthetic-validation number, not a real-data score."
+}

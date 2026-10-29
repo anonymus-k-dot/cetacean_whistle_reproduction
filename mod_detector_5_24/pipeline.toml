@@ -98,7 +98,7 @@ scale_db         = 20.0            # [REPLACEMENT] x = clip(dB - floor) / scale
 
 # --------------------------------------------------------------- S6 TRACKING (replacement)
 [decisions.s6]   # [REPLACEMENT] spec A-07/A-08/A-09: the paper's [32]/[33] are unavailable
-peak_threshold            = 0.5    # [REPLACEMENT] calibration rule applied on SYNTHETIC validation only -> 0.5 (models/detector/ridgenet-v1/calibration.json); frozen. NOT recalibrated for v2c (v2c was compared at this threshold)
+peak_threshold            = 0.4    # MOD 5-24: same calibration rule, SYNTHETIC validation only, applied to ridgenet-5-24 -> 0.4 (models/detector/ridgenet-5-24/calibration.json; val recall 0.642 at 0.4 vs 0.632 at 0.5, spread over grid 0.04); frozen. v2c keeps 0.5
 min_peak_separation_bins  = 2
 broadband_frame_fraction  = 0.30   # frames with this fraction of band nodes above threshold are treated as clicks/broadband and skipped
 max_gap_frames            = 12     # gap bridging (~64 ms). [REPLACEMENT] 8 -> 12 chosen on SYNTHETIC validation (grid, recall +~3 pts, no false-alarm cost); frozen
