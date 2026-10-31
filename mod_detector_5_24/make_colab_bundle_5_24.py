@@ -2,8 +2,8 @@
 
     python mod_detector_5_24/make_colab_bundle_5_24.py [--out PATH]
 
-Contents: src/whistlepipe/ (without __pycache__), configs/, whistle.py, this folder's configs, launcher and file list,
-metadata/manifest_363.csv (names of all encounter-191 files; the background picker needs the full list) and
+Contents: src/whistlepipe/ (without __pycache__), configs/, whistle.py, this folder's configs, launcher, file list and
+DCLDE 2011 benchmark, the trained ridgenet-5-24 checkpoint once it exists, metadata/manifest_363.csv (names of all encounter-191 files; the background picker needs the full list) and
 CODE_VERSION.json (git commit, uncommitted-change flag, SHA-256 of every packed file), as colab/make_colab_bundle.py does.
 """
 from __future__ import annotations
@@ -30,7 +30,8 @@ def main() -> None:
     args = ap.parse_args()
     files = sorted(p for p in (ROOT / "src" / "whistlepipe").rglob("*.py") if "__pycache__" not in p.parts)
     files += sorted((ROOT / "configs").glob("*.toml")) + [ROOT / "whistle.py", ROOT / "metadata" / "manifest_363.csv"]
-    files += [HERE / n for n in ("pipeline.toml", "detector.toml", "whistle_5_24.py", "background_files.csv")]
+    files += [HERE / n for n in ("pipeline.toml", "detector.toml", "whistle_5_24.py", "background_files.csv", "dclde2011.py")]
+    files += [p for p in [HERE / "models" / "detector" / "ridgenet-5-24" / "checkpoint.pt"] if p.exists()]   # after training
     version = {"git_commit": git("rev-parse", "HEAD"),
                "git_uncommitted_code_changes": bool(git("status", "--porcelain", "--", "src", "configs", "whistle.py", "mod_detector_5_24")),
                "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

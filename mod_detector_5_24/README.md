@@ -42,6 +42,30 @@ on the RTX 5060 laptop GPU. `train --resume` saves the training state every 250 
 The background picker lists the whole encounter-191 folder, so the notebook creates the 307 files it never opens as
 empty name-only placeholders and checks that the picker chose exactly the 56 downloaded files.
 
+## DCLDE 2011 benchmark (Li et al. 2023 test set)
+`dclde2011.py` runs the detector on the 9 test recordings and scores it with the Li et al. (2023) protocol,
+re-implemented from Silbido's scoring code (details in the file's docstring).
+```bash
+python mod_detector_5_24/dclde2011.py selftest                       # scorer check: GT vs itself = 100 %, shifted/truncated copies rejected
+python mod_detector_5_24/dclde2011.py detect                         # -> data/dclde2011_detections/ridgenet-5-24/
+python mod_detector_5_24/dclde2011.py detect --tag ridgenet-5-24_keep-harmonics --override decisions.s6.suppress_harmonics=false
+python mod_detector_5_24/dclde2011.py score --tag ridgenet-5-24_keep-harmonics --min-det-ms 150 [--gt 2025] [--min-overlap 0] [--full-band]
+```
+Data: `colab_download_dclde2011.py` (Drive) or the same files under `mod_detector_5_24/data/dclde2011/` (git-ignored).
+About 3 s of CPU per minute of audio. Detections are written in Silbido's tonal format (`.det`), so Silbido's
+`scoreall` can cross-check the scores.
+
+* **Harmonics.** The DCLDE annotations include harmonics; S6 suppresses them by default (the VAE-GMM dataset wants
+  fundamentals only). The benchmark run therefore turns harmonic suppression off.
+* **Minimum detection length.** Silbido's graph search (the benchmark's baseline, and the extraction step in Li et al.)
+  only outputs tonals of at least 150 ms; S6 keeps tracks from ~64 ms. The main score uses `--min-det-ms 150`; the
+  score without it is reported too. 150 ms is Silbido's default, not a value tuned on these files.
+* **Colab:** `colab_dclde2011_benchmark.py` (one cell) runs the self-test, both detection sets and all score variants
+  from Drive; `DETECT = False` re-scores existing detections only.
+* **Band.** Ground-truth whistles not entirely inside 5–24 kHz are excluded like low-SNR ones (not expected, not
+  penalised), so the scores are not directly comparable with Li et al.'s 5–50 kHz numbers. `--full-band` scores against
+  all whistles.
+
 ## Things to check after building
 * **Background banks are rebuilt, not copied.** Window screening runs inside the band, so the 5–24 kHz banks may keep
   different windows than v2c's. That is consistent but means the two detectors were not trained on identical backgrounds.
