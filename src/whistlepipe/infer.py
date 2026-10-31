@@ -8,7 +8,7 @@
       -> sonify.py on every image at the whistle's own centre frequency, plus the recording excerpt itself
 
 The trained files are read from where the training commands write them (configs/inference.toml [model]):
-    models/vaegmm/<run_id>/checkpoints/final.pt                 python whistle.py train-vae --experiment V1
+    models/vaegmm/<run_id>/checkpoints/last.pt                  python whistle.py train-vae --experiment V1 (= final.pt when done)
     models/vaegmm/<run_id>/gmm_K<K>/gmm.npz (+ gmm.json)        python whistle.py fit-gmm --experiment V1
     models/vaegmm/<run_id>/gmm_K<K>/component_features.npy      python whistle.py vae-eval components --experiment V1
 Missing files are reported (``python whistle.py model-status``); everything on the input side still runs.
@@ -102,7 +102,8 @@ def load_model(icfg: Cfg, vcfg: Cfg, device: torch.device) -> Model:
     if st["vae"]["present"]:
         try:
             m.vae, spec = load_trained_vae(p["run_dir"], device, icfg["model"]["checkpoint"])
-            st["vae"].update(loaded=True, latent_dim=m.vae.latent_dim, sha256=sha256_file(p["vae"]),
+            epoch = torch.load(p["vae"], map_location="cpu", weights_only=False).get("epoch")   # completed epochs
+            st["vae"].update(loaded=True, latent_dim=m.vae.latent_dim, sha256=sha256_file(p["vae"]), epoch=epoch,
                              spec={k: spec[k] for k in ("latent_dim", "beta", "use_critic", "epochs") if k in spec})
         except Exception as e:  # noqa: BLE001  (reported to the page, never fatal)
             st["vae"]["error"] = repr(e)
@@ -135,6 +136,11 @@ def load_model(icfg: Cfg, vcfg: Cfg, device: torch.device) -> Model:
                          f"(python whistle.py fit-gmm --experiment V1). New whistles meanwhile come from the encoder's own spread.")
     else:
         st["message"] = f"Model {st['run_id']} loaded (K = {m.gmm.K})."
+    epoch, epochs = st["vae"].get("epoch"), st["vae"].get("spec", {}).get("epochs")
+    st["vae"]["in_training"] = ok_v and epoch is not None and epochs is not None and epoch < epochs
+    if st["vae"]["in_training"]:
+        st["message"] = (f"VAE checkpoint from epoch {epoch} of {epochs}: training is still running, "
+                         f"so the recreations are provisional. ") + st["message"]
     for k in ("vae", "gmm", "component_features"):
         if st[k]["error"]:
             st["message"] += f" {k} failed to load: {st[k]['error']}"

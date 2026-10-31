@@ -1,10 +1,15 @@
 # PREPROCESSING SPECIFICATION
 
 **Project:** Reproduction of *"A Generative Model for Cetacean Whistles Using Variational Autoencoder and Mixture of Gaussians"* (G.-H. Park et al., IEEE Access, vol. 14, 2026, pp. 27877–27894, DOI 10.1109/ACCESS.2026.3664765)
-**Document status:** Authoritative preprocessing specification — **no preprocessing code exists yet**
+**Document status:** Authoritative record of what the paper specifies for preprocessing. Written before any code existed (see the status note below).
 **Created:** 2026-10-08
-**Location note:** this folder was originally spelled `resouces/` on disk; the project owner has since renamed it `resources/`. Path strings elsewhere in this document that read `resouces/` refer to this same folder (text left unchanged for traceability).
+**Location note:** this folder was originally spelled `resouces/` on disk; the project owner has since renamed it `resources/`. Path strings elsewhere in this document that read `resouces/` refer to this same folder (text left unchanged for traceability). The paper's file has also been renamed, from `VAE-GMM Cetacean Wistles.pdf` to `VAE-GMM Cetacean Whistles.pdf` (2026-10-31).
 **Revision 2 (2026-10-08):** added §11 (reference-detector analysis and replacement requirements) and a cross-reference on A-20. **No confirmed parameter in §§1–10 was changed.**
+
+> **Status note (2026-10-31; the body below is unchanged since Revision 2, for traceability).**
+> - **Code:** the pipeline is implemented (`README.md`). The choices §10.4 asks for before coding were made and recorded: as `[DECISION]` / `[REPLACEMENT]` entries in `configs/pipeline.toml`, and the train/test split (none, as in the paper) in `TRAINING_SPECIFICATION.md` §2. S5/S6 are newly designed replacements (README, "Research-integrity statement").
+> - **Data:** the project grew from the 363 files of encounter 191 to all 8 false killer whale encounters of ship 1705: 1,415 files, 180,154 images (`preprocessed/dataset_info.json`; README "Dataset record"). The counts of 363 below (§1, §2, §7, §10.2) describe encounter 191 only, and rule D-13 applies to every `encounter_<id>_audio/` folder.
+> - **[R32]** (`reference_32_mca_cfar.md`) is kept locally and is no longer distributed with the repository: the licence of that text is unknown. The values this document uses from it are in §3.6.
 
 ---
 

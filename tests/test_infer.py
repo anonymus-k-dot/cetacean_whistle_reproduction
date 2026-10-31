@@ -1,5 +1,5 @@
 """Inference engine: upload reading, the S2-S9 path, and the model step with randomly initialised files saved in the
-exact formats training writes (so a real final.pt / gmm.npz dropped into place takes the same code path)."""
+exact formats training writes (so a real last.pt / gmm.npz dropped into place takes the same code path)."""
 import json
 
 import numpy as np
@@ -37,14 +37,18 @@ RUN = "TEST_L64_random"
 K = 5
 
 
-def write_random_model(runs_dir, gmm=True, comp_feats=True):
-    """final.pt and gmm_K5/gmm.npz (+ gmm.json, component_features.npy) in the formats of train.py / gmm.py."""
+def write_random_model(runs_dir, gmm=True, comp_feats=True, epoch=300):
+    """last.pt (+ final.pt) of a finished run and gmm_K5/gmm.npz (+ gmm.json, component_features.npy) in the formats
+    of train.py / gmm.py. ``epoch`` < 300 leaves a mid-training run (last.pt only)."""
     torch.manual_seed(0)
     vae = VAE(64)
     ck = runs_dir / RUN / "checkpoints"
     ck.mkdir(parents=True)
-    torch.save({"vae": vae.state_dict(), "critic": None, "epoch": 300, "global_step": 0,
-                "spec": {"run_id": RUN, "latent_dim": 64, "beta": 1e-4, "use_critic": True, "epochs": 300}}, ck / "final.pt")
+    st = {"vae": vae.state_dict(), "critic": None, "epoch": epoch, "global_step": 0,
+          "spec": {"run_id": RUN, "latent_dim": 64, "beta": 1e-4, "use_critic": True, "epochs": 300}}
+    torch.save(st, ck / "last.pt")
+    if epoch == 300:
+        torch.save(st, ck / "final.pt")
     if not gmm:
         return
     g = GaussianMixtureEM(K, device="cpu", verbose=False)
@@ -86,7 +90,7 @@ def test_model_paths_match_the_training_layout():
     icfg, vcfg = load_inference_config(), load_vaegmm_config()
     p = model_paths(icfg, vcfg)
     rid, k = icfg["model"]["run_id"], icfg["model"]["n_components"]
-    assert p["vae"] == resolve(vcfg["paths"]["runs_dir"]) / rid / "checkpoints" / "final.pt"   # train.py: out/"checkpoints"/"final.pt"
+    assert p["vae"] == resolve(vcfg["paths"]["runs_dir"]) / rid / "checkpoints" / "last.pt"    # train.py: ck/"last.pt" every epoch
     assert p["gmm"] == gmm_dir(vcfg, rid, k) / "gmm.npz"                                        # evaluate.fit_gmm
     from whistlepipe.vaegmm.cli import EXPERIMENTS
 
@@ -187,10 +191,19 @@ def test_mismatched_gmm_is_reported_not_fatal(tmp_path):
     runs = tmp_path / "runs"
     runs.mkdir()
     write_random_model(runs, gmm=True, comp_feats=False)
-    torch.save({"vae": VAE(32).state_dict(), "spec": {"latent_dim": 32}}, runs / RUN / "checkpoints" / "final.pt")
+    torch.save({"vae": VAE(32).state_dict(), "spec": {"latent_dim": 32}}, runs / RUN / "checkpoints" / "last.pt")
     eng = make_engine(tmp_path)
     assert eng.model.status["ready"]["recreate"] and not eng.model.status["ready"]["same_type"]
     assert "latent size" in eng.model.status["gmm"]["error"]
+
+
+def test_mid_training_checkpoint_is_labelled(tmp_path):
+    st = make_engine(tmp_path, gmm=False, epoch=6).model.status
+    assert st["ready"]["recreate"] and st["vae"]["in_training"] and st["vae"]["epoch"] == 6
+    assert st["message"].startswith("VAE checkpoint from epoch 6 of 300")
+    (tmp_path / "done").mkdir()
+    done = make_engine(tmp_path / "done", gmm=False).model.status
+    assert done["vae"]["epoch"] == 300 and not done["vae"]["in_training"] and "epoch" not in done["message"]
 
 
 # ----------------------------------------------------------------------------- generation
