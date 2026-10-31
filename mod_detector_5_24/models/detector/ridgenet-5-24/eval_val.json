@@ -1,0 +1,774 @@
+{
+ "split": "val",
+ "n_samples": 600,
+ "category": "A: SYNTHETIC evaluation (ground truth from the generator)",
+ "detector": {
+  "version": "ridgenet-5-24",
+  "checkpoint": "/content/drive/MyDrive/whistle_detector_5_24/models/detector/ridgenet-5-24/checkpoint.pt",
+  "checkpoint_sha256": "6636c9f6728d7ecaec418f27edceb230d9adedb7e366deb35bcb265ae98021dd",
+  "n_params": 14209,
+  "block_type": "dense",
+  "macs_per_node": 13984,
+  "receptive_radius_tf": [
+   19,
+   9
+  ],
+  "trained_seed": 20261008,
+  "metrics": {
+   "step": 2000,
+   "val_loss": 0.6007211446762085,
+   "node_precision": 0.5175627599338578,
+   "node_recall": 0.6086121357106662,
+   "node_f1": 0.5594068521788109
+  }
+ },
+ "node": {
+  "thresholds": [
+   0.0,
+   0.01,
+   0.02,
+   0.03,
+   0.04,
+   0.05,
+   0.06,
+   0.07,
+   0.08,
+   0.09,
+   0.1,
+   0.11,
+   0.12,
+   0.13,
+   0.14,
+   0.15,
+   0.16,
+   0.17,
+   0.18,
+   0.19,
+   0.2,
+   0.21,
+   0.22,
+   0.23,
+   0.24,
+   0.25,
+   0.26,
+   0.27,
+   0.28,
+   0.29,
+   0.3,
+   0.31,
+   0.32,
+   0.33,
+   0.34,
+   0.35000000000000003,
+   0.36,
+   0.37,
+   0.38,
+   0.39,
+   0.4,
+   0.41000000000000003,
+   0.42,
+   0.43,
+   0.44,
+   0.45,
+   0.46,
+   0.47000000000000003,
+   0.48,
+   0.49,
+   0.5,
+   0.51,
+   0.52,
+   0.53,
+   0.54,
+   0.55,
+   0.56,
+   0.5700000000000001,
+   0.58,
+   0.59,
+   0.6,
+   0.61,
+   0.62,
+   0.63,
+   0.64,
+   0.65,
+   0.66,
+   0.67,
+   0.68,
+   0.6900000000000001,
+   0.7000000000000001,
+   0.71,
+   0.72,
+   0.73,
+   0.74,
+   0.75,
+   0.76,
+   0.77,
+   0.78,
+   0.79,
+   0.8,
+   0.81,
+   0.8200000000000001,
+   0.8300000000000001,
+   0.84,
+   0.85,
+   0.86,
+   0.87,
+   0.88,
+   0.89,
+   0.9,
+   0.91,
+   0.92,
+   0.93,
+   0.9400000000000001,
+   0.9500000000000001,
+   0.96,
+   0.97,
+   0.98,
+   0.99
+  ],
+  "precision": [
+   0.0027379807558900932,
+   0.4313483471473294,
+   0.4475946588622645,
+   0.457742798057767,
+   0.4640979105588906,
+   0.4685568597115772,
+   0.47316200651298584,
+   0.47659692077582144,
+   0.47977458763522685,
+   0.4826342128451959,
+   0.48535758064245293,
+   0.48763711829232137,
+   0.48943637916310845,
+   0.4912102568515252,
+   0.4928269457342851,
+   0.49435978799079433,
+   0.4960479336087937,
+   0.4973344630973186,
+   0.49864125608326526,
+   0.4996965369510889,
+   0.5008789552988449,
+   0.5020554243369454,
+   0.5032535798441182,
+   0.5044400929004053,
+   0.5051646371030457,
+   0.5060895462024211,
+   0.5070223551898945,
+   0.507923849442224,
+   0.5085193944246849,
+   0.5091017885692382,
+   0.5099324070597071,
+   0.5106461190442528,
+   0.5113642815238167,
+   0.5123867988178613,
+   0.5129626096909576,
+   0.5134925498908339,
+   0.5141898840014224,
+   0.5147298483139024,
+   0.5151479954314033,
+   0.5159171936778092,
+   0.5164577948993027,
+   0.5170453433530989,
+   0.5177554307263228,
+   0.5182108437296754,
+   0.51895029317829,
+   0.5195162122474898,
+   0.5198897007585561,
+   0.5206761092730126,
+   0.5211941796287004,
+   0.521698835475682,
+   0.5224265598446225,
+   0.523158632315457,
+   0.5236867317610127,
+   0.5243312362539001,
+   0.5248991407717656,
+   0.5254904385097263,
+   0.5260583624594131,
+   0.526848564131315,
+   0.5273041810829964,
+   0.5280896525023805,
+   0.5285901811499081,
+   0.5291475565396173,
+   0.5298589640421837,
+   0.5304396843291995,
+   0.5310813554612779,
+   0.5317731135719804,
+   0.5324072078285985,
+   0.5330698857792454,
+   0.5334558543667148,
+   0.5337993555786139,
+   0.5346281372828879,
+   0.5352995025753582,
+   0.5358441212981025,
+   0.5363173322336524,
+   0.537028323025903,
+   0.5378816901408451,
+   0.5385269121813031,
+   0.5390365921755877,
+   0.5393862302896957,
+   0.5400369003690036,
+   0.5405850749039767,
+   0.5412676698586412,
+   0.5420325040364875,
+   0.5430104336059445,
+   0.5440236516410122,
+   0.5448170142912321,
+   0.5458345520132593,
+   0.5468323286997171,
+   0.5478026214340787,
+   0.5490084985835694,
+   0.5499183964910491,
+   0.5509069517886925,
+   0.5515116477683323,
+   0.5524214080883338,
+   0.5536924723510525,
+   0.5553156357170075,
+   0.5575052730255449,
+   0.5590266004993373,
+   0.5606330695543523,
+   0.5570898962358526
+  ],
+  "recall": [
+   1.0,
+   0.7371813757262218,
+   0.7209187220853908,
+   0.7121156769624192,
+   0.7051628033043826,
+   0.6995415817198345,
+   0.695181305019032,
+   0.6909270891028436,
+   0.6872620997678447,
+   0.6841863370140354,
+   0.6812519886397115,
+   0.678411916518378,
+   0.6754068609543113,
+   0.6727317722757109,
+   0.6703984350142004,
+   0.6682890038535418,
+   0.6663563406672401,
+   0.6640230034057296,
+   0.6616896661442191,
+   0.6597687874895413,
+   0.6581189530622106,
+   0.656292350660523,
+   0.6543832565374689,
+   0.652686283983643,
+   0.6506829136075987,
+   0.6488445266742874,
+   0.6470768469307188,
+   0.645485935161507,
+   0.6436239791649481,
+   0.6416913159786465,
+   0.6401121887410585,
+   0.638450569782104,
+   0.6368596580128922,
+   0.6354219451547898,
+   0.6337603261958353,
+   0.631921939262524,
+   0.6305077954676691,
+   0.6290347290146953,
+   0.627196342081384,
+   0.6258529054762718,
+   0.6240498721378319,
+   0.6227064355327198,
+   0.6213040762694887,
+   0.6197131645002769,
+   0.6184875732114027,
+   0.6170498603533002,
+   0.6154471640524647,
+   0.613856252283253,
+   0.612053218944813,
+   0.6102973237328683,
+   0.6086121357106662,
+   0.607103715662821,
+   0.6055010193619854,
+   0.6040279529090117,
+   0.6025666709876616,
+   0.6010346818765688,
+   0.5995144772970998,
+   0.5980060572492546,
+   0.5962737311005574,
+   0.5947535265210884,
+   0.5931743992835005,
+   0.5914302886031795,
+   0.5897215315177299,
+   0.5877299456733092,
+   0.585655868107522,
+   0.5840060336801913,
+   0.58216764674688,
+   0.5802349835605783,
+   0.5780901988050485,
+   0.5759336295178948,
+   0.5738477674204838,
+   0.5719504578290536,
+   0.5697349658837809,
+   0.5670716617368042,
+   0.5648679543231554,
+   0.5625581861248925,
+   0.5600598654206489,
+   0.5574201303369197,
+   0.5546861190002004,
+   0.551893185005362,
+   0.5489941902259095,
+   0.5455413224601389,
+   0.5419941784413779,
+   0.5391069681935492,
+   0.5356187468329071,
+   0.5319184039030369,
+   0.5278173868979578,
+   0.5238459997407403,
+   0.5191204025596002,
+   0.5138645014553896,
+   0.5082550644024654,
+   0.5021506770213418,
+   0.49465571490861093,
+   0.485817316190768,
+   0.4755294200831988,
+   0.463697750332913,
+   0.4485428426647183,
+   0.4274603155897569,
+   0.3965730582038017,
+   0.3346924826472772
+  ],
+  "average_precision": 0.40003547974565634,
+  "n_pos_nodes": 84857,
+  "n_neg_nodes": 30907691
+ },
+ "track_level_by_tau": [
+  {
+   "tau": 0.3,
+   "expected_fundamentals": 598,
+   "recalled": 389,
+   "track_recall": 0.6505016722408027,
+   "n_tracks": 1116,
+   "true_tracks": 492,
+   "track_precision": 0.44086021505376344,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.025706940874036,
+   "false_tracks_per_min_on_whistle_free_samples": 48.13058035714287,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 12,
+     "expected": 122,
+     "recall": 0.09836065573770492
+    },
+    "[5,10)": {
+     "recalled": 157,
+     "expected": 244,
+     "recall": 0.6434426229508197
+    },
+    "[10,15)": {
+     "recalled": 93,
+     "expected": 101,
+     "recall": 0.9207920792079208
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.35,
+   "expected_fundamentals": 598,
+   "recalled": 387,
+   "track_recall": 0.6471571906354515,
+   "n_tracks": 1113,
+   "true_tracks": 491,
+   "track_precision": 0.4411500449236298,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.028423772609819,
+   "false_tracks_per_min_on_whistle_free_samples": 48.13058035714287,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 12,
+     "expected": 122,
+     "recall": 0.09836065573770492
+    },
+    "[5,10)": {
+     "recalled": 155,
+     "expected": 244,
+     "recall": 0.6352459016393442
+    },
+    "[10,15)": {
+     "recalled": 93,
+     "expected": 101,
+     "recall": 0.9207920792079208
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.4,
+   "expected_fundamentals": 598,
+   "recalled": 384,
+   "track_recall": 0.6421404682274248,
+   "n_tracks": 1109,
+   "true_tracks": 489,
+   "track_precision": 0.4409377817853922,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0286458333333333,
+   "false_tracks_per_min_on_whistle_free_samples": 48.13058035714287,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 12,
+     "expected": 122,
+     "recall": 0.09836065573770492
+    },
+    "[5,10)": {
+     "recalled": 152,
+     "expected": 244,
+     "recall": 0.6229508196721312
+    },
+    "[10,15)": {
+     "recalled": 93,
+     "expected": 101,
+     "recall": 0.9207920792079208
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.45,
+   "expected_fundamentals": 598,
+   "recalled": 381,
+   "track_recall": 0.637123745819398,
+   "n_tracks": 1100,
+   "true_tracks": 489,
+   "track_precision": 0.4445454545454545,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0236220472440944,
+   "false_tracks_per_min_on_whistle_free_samples": 47.43303571428572,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 12,
+     "expected": 122,
+     "recall": 0.09836065573770492
+    },
+    "[5,10)": {
+     "recalled": 151,
+     "expected": 244,
+     "recall": 0.6188524590163934
+    },
+    "[10,15)": {
+     "recalled": 91,
+     "expected": 101,
+     "recall": 0.900990099009901
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.5,
+   "expected_fundamentals": 598,
+   "recalled": 378,
+   "track_recall": 0.6321070234113713,
+   "n_tracks": 1095,
+   "true_tracks": 487,
+   "track_precision": 0.44474885844748857,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0238095238095237,
+   "false_tracks_per_min_on_whistle_free_samples": 46.73549107142858,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 11,
+     "expected": 122,
+     "recall": 0.09016393442622951
+    },
+    "[5,10)": {
+     "recalled": 149,
+     "expected": 244,
+     "recall": 0.610655737704918
+    },
+    "[10,15)": {
+     "recalled": 91,
+     "expected": 101,
+     "recall": 0.900990099009901
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.55,
+   "expected_fundamentals": 598,
+   "recalled": 378,
+   "track_recall": 0.6321070234113713,
+   "n_tracks": 1093,
+   "true_tracks": 486,
+   "track_precision": 0.444647758462946,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0211640211640212,
+   "false_tracks_per_min_on_whistle_free_samples": 46.73549107142858,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 11,
+     "expected": 122,
+     "recall": 0.09016393442622951
+    },
+    "[5,10)": {
+     "recalled": 148,
+     "expected": 244,
+     "recall": 0.6065573770491803
+    },
+    "[10,15)": {
+     "recalled": 92,
+     "expected": 101,
+     "recall": 0.9108910891089109
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.6,
+   "expected_fundamentals": 598,
+   "recalled": 375,
+   "track_recall": 0.6270903010033445,
+   "n_tracks": 1084,
+   "true_tracks": 480,
+   "track_precision": 0.44280442804428044,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0186666666666666,
+   "false_tracks_per_min_on_whistle_free_samples": 46.03794642857144,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 11,
+     "expected": 122,
+     "recall": 0.09016393442622951
+    },
+    "[5,10)": {
+     "recalled": 146,
+     "expected": 244,
+     "recall": 0.5983606557377049
+    },
+    "[10,15)": {
+     "recalled": 91,
+     "expected": 101,
+     "recall": 0.900990099009901
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.65,
+   "expected_fundamentals": 598,
+   "recalled": 372,
+   "track_recall": 0.6220735785953178,
+   "n_tracks": 1071,
+   "true_tracks": 477,
+   "track_precision": 0.44537815126050423,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0188172043010753,
+   "false_tracks_per_min_on_whistle_free_samples": 46.03794642857144,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 9,
+     "expected": 122,
+     "recall": 0.07377049180327869
+    },
+    "[5,10)": {
+     "recalled": 146,
+     "expected": 244,
+     "recall": 0.5983606557377049
+    },
+    "[10,15)": {
+     "recalled": 90,
+     "expected": 101,
+     "recall": 0.8910891089108911
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.7,
+   "expected_fundamentals": 598,
+   "recalled": 371,
+   "track_recall": 0.6204013377926422,
+   "n_tracks": 1063,
+   "true_tracks": 474,
+   "track_precision": 0.44590780809031044,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.013477088948787,
+   "false_tracks_per_min_on_whistle_free_samples": 44.64285714285715,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 9,
+     "expected": 122,
+     "recall": 0.07377049180327869
+    },
+    "[5,10)": {
+     "recalled": 145,
+     "expected": 244,
+     "recall": 0.5942622950819673
+    },
+    "[10,15)": {
+     "recalled": 90,
+     "expected": 101,
+     "recall": 0.8910891089108911
+    },
+    "[15,40)": {
+     "recalled": 127,
+     "expected": 131,
+     "recall": 0.9694656488549618
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.75,
+   "expected_fundamentals": 598,
+   "recalled": 368,
+   "track_recall": 0.6153846153846154,
+   "n_tracks": 1041,
+   "true_tracks": 472,
+   "track_precision": 0.45341018251681076,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0190217391304348,
+   "false_tracks_per_min_on_whistle_free_samples": 41.85267857142858,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 9,
+     "expected": 122,
+     "recall": 0.07377049180327869
+    },
+    "[5,10)": {
+     "recalled": 142,
+     "expected": 244,
+     "recall": 0.5819672131147541
+    },
+    "[10,15)": {
+     "recalled": 89,
+     "expected": 101,
+     "recall": 0.8811881188118812
+    },
+    "[15,40)": {
+     "recalled": 128,
+     "expected": 131,
+     "recall": 0.9770992366412213
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  },
+  {
+   "tau": 0.8,
+   "expected_fundamentals": 598,
+   "recalled": 364,
+   "track_recall": 0.6086956521739131,
+   "n_tracks": 1030,
+   "true_tracks": 472,
+   "track_precision": 0.458252427184466,
+   "harmonic_tracks_leaked": 0,
+   "tracks_per_recalled_whistle": 1.0192307692307692,
+   "false_tracks_per_min_on_whistle_free_samples": 41.15513392857144,
+   "recall_by_snr_db": {
+    "[-5,5)": {
+     "recalled": 8,
+     "expected": 122,
+     "recall": 0.06557377049180328
+    },
+    "[5,10)": {
+     "recalled": 139,
+     "expected": 244,
+     "recall": 0.569672131147541
+    },
+    "[10,15)": {
+     "recalled": 89,
+     "expected": 101,
+     "recall": 0.8811881188118812
+    },
+    "[15,40)": {
+     "recalled": 128,
+     "expected": 131,
+     "recall": 0.9770992366412213
+    }
+   },
+   "false_tracks_per_min_surrogate_negative": 0.0
+  }
+ ],
+ "surrogate_negative": {
+  "n_samples": 200,
+  "minutes": 4.551111111111111,
+  "max_node_confidence": 0.31111952662467957,
+  "note": "phase-randomised backgrounds + synthetic clicks/sweeps; contamination-free"
+ },
+ "note_precision": "track_precision on REAL-background samples is a LOWER BOUND: unlabeled real tonal structure that survives the classical background screen counts as a false track. Use false_tracks_per_min_surrogate_negative for the detector's own false-alarm behaviour on noise and clicks.",
+ "track_level_at_config_tau": {
+  "tau": 0.5,
+  "expected_fundamentals": 598,
+  "recalled": 378,
+  "track_recall": 0.6321070234113713,
+  "n_tracks": 1095,
+  "true_tracks": 487,
+  "track_precision": 0.44474885844748857,
+  "harmonic_tracks_leaked": 0,
+  "tracks_per_recalled_whistle": 1.0238095238095237,
+  "false_tracks_per_min_on_whistle_free_samples": 46.73549107142858,
+  "recall_by_snr_db": {
+   "[-5,5)": {
+    "recalled": 11,
+    "expected": 122,
+    "recall": 0.09016393442622951
+   },
+   "[5,10)": {
+    "recalled": 149,
+    "expected": 244,
+    "recall": 0.610655737704918
+   },
+   "[10,15)": {
+    "recalled": 91,
+    "expected": 101,
+    "recall": 0.900990099009901
+   },
+   "[15,40)": {
+    "recalled": 127,
+    "expected": 131,
+    "recall": 0.9694656488549618
+   }
+  },
+  "false_tracks_per_min_surrogate_negative": 0.0
+ },
+ "calibration": {
+  "split_used": "val",
+  "tau": 0.4,
+  "criterion": "among thresholds with <= 2 false tracks/min on the contamination-free surrogate negatives and track recall within 0.01 of the best, take the one closest to 0.5",
+  "track_recall": 0.6421404682274248,
+  "false_tracks_per_min_surrogate_negative": 0.0,
+  "recall_spread_over_grid": 0.041806020066889604,
+  "note": "Synthetic validation is nearly flat in tau, so the data do not select a precise value; 0.5 is the natural decision boundary of the BCE-trained confidence. Copy into configs/pipeline.toml decisions.s6.peak_threshold ONCE, before the real-data phases. Not tuned on real data and not tuned to any paper count."
+ }
+}

@@ -51,10 +51,15 @@ def validate(model, dev, ev: dict, tau: float = 0.5, bs: int = 32) -> dict:
             "node_f1": 2 * prec * rec / max(1e-9, prec + rec)}
 
 
-def train_detector(cfg: Cfg, dcfg: Cfg, version: str = "ridgenet-v1") -> Path:
+def train_detector(cfg: Cfg, dcfg: Cfg, version: str = "ridgenet-v1", resume: bool = False, resume_every: int = 250) -> Path:
+    """resume=True: write the full training state to <version>/resume.pt every `resume_every` steps and, if that file
+    exists, continue from it. The synthetic stream is indexed by step, so a resumed run sees the same samples in the same
+    order as an uninterrupted one. resume.pt is deleted when training finishes."""
     tr, m = dcfg["train"], dcfg["model"]
     out = project_path(cfg, "models_dir") / "detector" / version
-    if (out / "checkpoint.pt").exists():
+    state_p = out / "resume.pt"
+    resuming = resume and state_p.exists()
+    if (out / "checkpoint.pt").exists() and not resuming:
         raise FileExistsError(f"{out / 'checkpoint.pt'} exists; trained checkpoints are never overwritten. Use --version.")
     out.mkdir(parents=True, exist_ok=True)
     seed = int(dcfg["synth"]["seed"])
@@ -66,16 +71,26 @@ def train_detector(cfg: Cfg, dcfg: Cfg, version: str = "ridgenet-v1") -> Path:
     print(f"RidgeNet[{model.block_type}]: {model.n_params()} parameters, {model.macs_per_node()} MACs/node, receptive radius (t,f) = {model.receptive_radius()}, device={dev}", flush=True)
 
     steps, bs = int(tr["steps"]), int(tr["batch_size"])
+    st = torch.load(state_p, map_location="cpu", weights_only=False) if resuming else None
+    start = int(st["step"]) if st else 0
     ds = SynthTrainDataset(cfg, dcfg, "train", steps * bs)
+    if start:
+        ds = torch.utils.data.Subset(ds, range(start * bs, steps * bs))
     loader = torch.utils.data.DataLoader(ds, batch_size=bs, shuffle=False, num_workers=int(tr["num_workers"]),
                                          persistent_workers=True, prefetch_factor=4, pin_memory=(dev.type == "cuda"))
     val = build_eval_set(cfg, dcfg, "val", int(tr["val_samples"]))
     opt = torch.optim.AdamW(model.parameters(), lr=float(tr["lr"]), weight_decay=float(tr["weight_decay"]))
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=float(tr["lr"]), total_steps=steps, pct_start=0.1)
-    best, log = -1.0, []
-    t0 = time.time()
+    best, log, resumed_at = -1.0, [], []
+    if st:
+        if (st["detector_config_hash"], st["band"], st["steps"], st["batch_size"]) != (dcfg["_meta"]["effective_hash"], list(band), steps, bs):
+            raise ValueError(f"{state_p} was written with a different configuration; delete it or use another --version")
+        model.load_state_dict(st["model_state"]); opt.load_state_dict(st["opt_state"]); sched.load_state_dict(st["sched_state"])
+        best, log, resumed_at = float(st["best"]), list(st["log"]), list(st["resumed_at"]) + [start]
+        print(f"resuming after step {start} of {steps}", flush=True)
+    t0 = time.time() - (float(st["elapsed_s"]) if st else 0.0)
     model.train()
-    for step, (x, y, w) in enumerate(loader, 1):
+    for step, (x, y, w) in enumerate(loader, start + 1):
         x, y, w = x.to(dev, non_blocking=True), y.to(dev, non_blocking=True), w.to(dev, non_blocking=True)
         loss, lb, ld = loss_fn(model(x), y, w, float(tr["pos_weight"]), float(tr["dice_weight"]))
         opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); sched.step()
@@ -90,13 +105,22 @@ def train_detector(cfg: Cfg, dcfg: Cfg, version: str = "ridgenet-v1") -> Path:
                 torch.save({"model_state": model.state_dict(), "arch": {"channels": m["channels"], "dilations": [list(d) for d in m["dilations"]], "block_type": m.get("block_type", "dense")},
                             "band": list(band), "conditioning": dict(cfg["decisions"]["s5"]["conditioning"]), "version": version,
                             "seed": seed, "metrics": {"step": step, **v}, "train_cfg": dcfg.to_dict()["train"]}, out / "checkpoint.pt")
+        if resume and step % resume_every == 0 and step < steps:
+            tmp = state_p.with_suffix(".tmp")
+            torch.save({"step": step, "model_state": model.state_dict(), "opt_state": opt.state_dict(), "sched_state": sched.state_dict(),
+                        "best": best, "log": log, "resumed_at": resumed_at, "elapsed_s": time.time() - t0,
+                        "detector_config_hash": dcfg["_meta"]["effective_hash"], "band": list(band), "steps": steps, "batch_size": bs}, tmp)
+            tmp.replace(state_p)
     (out / "train_log.json").write_text(json.dumps(log, indent=1), encoding="utf-8")
     info = {"version": version, "checkpoint_sha256": sha256_file(out / "checkpoint.pt"), "best_val_node_f1": best,
             "n_params": model.n_params(), "detector_config_hash": dcfg["_meta"]["effective_hash"],
             "pipeline_config_hash": cfg["_meta"]["effective_hash"], "seed": seed, "steps": steps, "batch_size": bs,
             "train_wall_s": round(time.time() - t0, 1), "software": software_versions(),
             "note": "trained on SYNTHETIC data only; node F1 here is a synthetic-validation number, not a real-data score."}
+    if resumed_at:
+        info["resumed_after_steps"] = resumed_at
     (out / "train_info.json").write_text(json.dumps(info, indent=2), encoding="utf-8")
     (out / "detector_config.json").write_text(json.dumps(dcfg.to_dict(), indent=2), encoding="utf-8")   # full effective config incl. overrides
+    state_p.unlink(missing_ok=True)
     print("saved", out, flush=True)
     return out

@@ -66,8 +66,8 @@ python whistle.py list-sets                        # validation sets (val1/val5/
 python whistle.py build-backgrounds                # real-background banks for synthetic training (S1-S3 on 56 non-validation files)
 python whistle.py build-ridge-masks                # label-free masks of real faint whistles in the training backgrounds; needed
                                                    #   before training with synth.labels.ignore_background_ridges = true (v2c, v2e)
-python whistle.py train --version ridgenet-v1      # train S5 on SYNTHETIC data (checkpoints are never overwritten; full settings
-                                                   #   of v2c-v2e: models/detector/<ver>/detector_config.json)
+python whistle.py train --version ridgenet-v1      # train S5 on SYNTHETIC data (checkpoints are never overwritten; --resume continues
+                                                   #   after an interruption; full settings of v2c-v2e: models/detector/<ver>/detector_config.json)
 python whistle.py eval-synth --split val --calibrate   # synthetic validation + threshold calibration
 python whistle.py eval-synth --split test              # synthetic test
 python whistle.py build-manifest                   # once: hash every raw file -> metadata/manifest_all.csv (never overwritten;
