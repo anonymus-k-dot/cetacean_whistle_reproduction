@@ -124,6 +124,7 @@
       txt.textContent = (m.ready.same_type ? 'The model is ready. Every whistle you bring gets a recreation and new whistles of its family.'
         : m.ready.recreate ? 'The model is ready to recreate whistles; its map of whistle families is still being drawn.'
         : 'The model is still in training. Finding whistles and hearing them works now; the recreations and new whistles appear here once it is done.')
+        + (m.vae.in_training ? ` For now it is a snapshot taken part-way through training (epoch ${m.vae.epoch} of ${m.vae.spec.epochs}), so its recreations are still rough.` : '')
         + (S.status.matches_training_data === false ? ' (Note: the preprocessing settings differ from the training data.)' : '');
       st.title = m.message;
       st.classList.toggle('ok', m.ready.recreate);

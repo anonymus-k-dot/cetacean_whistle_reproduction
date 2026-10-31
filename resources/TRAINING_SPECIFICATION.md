@@ -1,7 +1,7 @@
 # TRAINING AND EVALUATION SPECIFICATION — VAE-GMM
 
 **Project:** reproduction of *"A Generative Model for Cetacean Whistles Using Variational Autoencoder and Mixture of Gaussians"* (Park et al., IEEE Access 14, 2026, pp. 27877–27894).
-**Created:** 2026-10-22. **Scope:** everything after preprocessing. The dataset is fixed and is **not** re-processed.
+**Created:** 2026-10-22. **Revised:** 2026-10-28 (items 18–19, revised G3 criterion, G4 outcome, Colab batch sizes) and 2026-10-31 (main-run figures in §3.3, status §3.10). **Scope:** everything after preprocessing. The dataset is fixed and is **not** re-processed.
 **Companion files:** `configs/vaegmm.toml` (the `[paper]` section is locked by `src/whistlepipe/vaegmm/config.py`) and `src/whistlepipe/vaegmm/`.
 
 ## 0. Conventions
@@ -29,7 +29,7 @@ This audit covers the plan of 2026-10-21 and the brief of 2026-10-22, checked ag
 |---|---|---|---|---|
 | 1 | Adversarial weight | called γ | eq. 4: L = L_rec + βL_KL + **λ**L_adv; App. A: "WGAN-GP weight λ was set to 1"; gradient penalty λ_GP = 5 (eq. 5, App. A) | Named `lambda_adv` = 1, separate from `lambda_gp` = 5 |
 | 2 | Critic output / loss family | not analysed | Table 8 output layer **sigmoid**; eq. 5 "standard WGAN-GP loss" on D(·) = critic output; eq. 4 L_adv = −E log D(x̂) | **[CONFLICT]**, resolved literally (§3.2). No substitution of a standard GAN or WGAN-GP form |
-| 3 | Learning rates | plan kept 1e-3 / 2e-4 at batch 128; brief asks for linear scaling | 1e-3 / 2e-4 at aggregate batch 896 (App. A) | Linear-scaled **[DEVIATION]**: 1.4286e-4 / 2.8571e-5, after verifying aggregation and reduction (§3.3) |
+| 3 | Learning rates | plan kept 1e-3 / 2e-4 at batch 128; brief asks for linear scaling | 1e-3 / 2e-4 at aggregate batch 896 (App. A) | Linear-scaled **[DEVIATION]**, lr × B/896, after verifying aggregation and reduction (§3.3): 1.4286e-4 / 2.8571e-5 at B = 128 (gates); 6e-3 / 1.2e-3 at B = 5376 (V1 main run) |
 | 4 | "Standard VAE" (Table 4 row 1) | plan: β = 1e-4, no critic | §IV-D-1 defines "standard VAEs where β = 1" | Primary: β = 1, no critic, z ~ N(0, I) **[IMPLIED, weak]**. Supplementary at zero training cost: row-3 VAE (β = 1e-4) sampled from N(0, I) |
 | 5 | EM "probability tolerance 1e-8" | plan also used it as a MATLAB posterior cut-off | App. B: "probability tolerance for early stopping was set to 10⁻⁸"; nothing else | Posterior cut-off **removed** (not stated). The stopping rule is the relative change of the mean log-likelihood ≤ 1e-8, the convergence check of [35] §9.2.2 **[DECISION]** |
 | 6 | Precision/Recall feature network | plan: Inception features | "quantified following the method proposed in [47]"; [47] uses VGG-16 fc2 features, k = 3 | VGG-16 fc2, k = 3. Weights download pending approval |
@@ -126,14 +126,14 @@ The only numerical safeguard is computing log D as `logsigmoid(a)`, an identical
 | LR schedule | not stated | constant [DECISION] |
 | Batch | 128/GPU × 7 = 896 [EXPLICIT] | **One GPU. Main run on a Colab A100: B = 2688 (40 GB) or 5376 (80 GB) [DEVIATION]; fallback B = 896 with the paper's learning rates (no deviation). Laptop gates: B = 128.** Set per run by override (`colab/train_V1_colab.ipynb`), recorded in `train_info.json`. Optional gradient accumulation (`train.micro_batch`) gives the same update with less memory |
 | Critic steps | 3 per VAE iteration [EXPLICIT] | 3; critic steps precede each VAE step, each on a **fresh** real batch ([49] Alg. 1) [DECISION] |
-| Epochs | 300 [EXPLICIT] | 300 = 1,408 VAE steps/epoch (last batch 58 images) = 422,400 VAE + 1,267,200 critic updates |
+| Epochs | 300 [EXPLICIT] | 300. Steps per epoch = ⌈180,154 / B⌉: 1,408 at B = 128 (last batch 58 images; 422,400 VAE + 1,267,200 critic updates), 202 at 896, 68 at 2688, **34 at 5376 (V1 main run: 10,200 VAE + 30,600 critic updates)** |
 | Model kept | not stated | final epoch; no early stopping or model selection [DECISION] |
-| Numerics | not stated | fp32, TF32 off, deterministic algorithms, fixed seeds (repo policy) [DECISION] |
+| Numerics | not stated | fp32, TF32 off, fixed seeds (repo policy) [DECISION]. Deterministic algorithms in the gates and by default; the **V1 main run uses `train.cudnn_benchmark = true`** (§3.9), so it is not bit-deterministic (`train_info.json` records `deterministic_algorithms: false`) |
 
 **Verification behind the learning-rate deviation** (unit tests in `tests/test_vaegmm_*.py`):
-1. *Loss reduction.* Every loss is a batch mean of per-image terms. So the accumulated gradient of 7 micro-batches of 128 equals the gradient of one 896 batch, and our 128-batch gradient is an unbiased estimate of the paper's gradient with ≈ 7× the variance.
+1. *Loss reduction.* Every loss is a batch mean of per-image terms. So the accumulated gradient of 7 micro-batches of 128 equals the gradient of one 896 batch, and a 128-batch gradient is an unbiased estimate of the paper's gradient with ≈ 7× the variance (at B = 5376, ≈ 1/6 of it, with 6× fewer updates per epoch).
 2. *Aggregation across the 7 GPUs* (mean or sum; App. A does not say). Adam's update −lr·m̂/(√v̂ + ε) is invariant to a constant gradient scale (up to ε). So mean versus sum does not change the paper's effective step, and the scaling question is only about noise and number of updates.
-3. *What the linear rule preserves:* learning rate × updates per epoch. On our data that is 1e-3 × 202 = 0.202 and 1.4286e-4 × 1,408 = 0.201.
+3. *What the linear rule preserves:* learning rate × updates per epoch. On our data that is 1e-3 × 202 = 0.202, 1.4286e-4 × 1,408 = 0.201 and, for the V1 main run, 6e-3 × 34 = 0.204.
 
 The linear rule is an SGD heuristic. The documented alternative for adaptive methods, the square-root rule (Malladi et al., NeurIPS 2022), gives 3.78e-4 / 7.56e-5 but would also change Adam's β₁ and β₂. It is **not** used.
 
@@ -236,7 +236,7 @@ Sweeps never start before V1 has finished and been evaluated.
 | `train.cudnn_benchmark` | cuDNN autotuning: same maths, faster kernels, not bit-deterministic |
 | `train.tf32` | TF32 tensor cores (Ampere and newer): slightly reduced internal precision. Stored in the run spec; a [DEVIATION] when used |
 
-### 3.10 Implementation status (2026-10-22)
+### 3.10 Implementation status (2026-10-31)
 
 | Part | Status |
 |---|---|
@@ -245,7 +245,9 @@ Sweeps never start before V1 has finished and been evaluated.
 | LDM baseline (Table 9) | implemented, unit-tested (shapes, loss, sampler) |
 | WhistleGAN and WGAN-GP baselines | **not implemented**: the paper gives no generator architecture (only Table 6 sizes). Needs either ref. [20] for WhistleGAN or an owner-approved [DECISION] design |
 | Feature-network weights | download code present (`fetch-eval-weights --approved`); **not downloaded** (approval pending) |
-| Measured cost | EM at K = 10k on 180,154 × 64 latents: ≈ 17 s per iteration on the RTX 5060 Laptop (memory-bound), so ≤ ≈ 7 h per 1,500-iteration fit. VAE training time is measured by gate G5 |
+| Measured cost | EM at K = 10k on 180,154 × 64 latents: ≈ 17 s per iteration on the RTX 5060 Laptop (memory-bound), so ≤ ≈ 7 h per 1,500-iteration fit. VAE training: gate G5 measured 0.56 s per iteration at B = 128 with the critic on the laptop (66 h projected for 300 epochs); the V1 main run takes about 6 min per epoch on a Colab A100 80 GB (≈ 30 h) |
+| Gates (laptop, B = 128) | G1, G2, G5, G6 passed 2026-10-22; G3 passed 2026-10-28 with the revised criterion (item 19); G4 not met as measured and accepted by the project owner 2026-10-28 (§4) |
+| V1 main run | training on Colab since 2026-10-29 with B = 5376, lr 6e-3 / 1.2e-3 (`models/vaegmm/V1_L64_b1e-4_critic/train_info.json`). No GMM fit or evaluation result exists yet |
 
 ## 4. Validation gates (all must pass before the main run)
 
@@ -256,7 +258,7 @@ Sweeps never start before V1 has finished and been evaluated.
 | G2 numerics | GPU-vs-CPU forward parity of VAE and critic (max abs. diff ≤ 1e-5); finite losses and gradients on real batches |
 | G3 smoke | 2 epochs on a 2,048-image subset. (a) A trainer restored from the epoch-1 checkpoint equals it bit-identically; (b) max \|resumed − uninterrupted\| ≤ 10 × max \|uninterrupted − repeated uninterrupted\| (bit-identical when the repeat is). Revised 2026-10-22 (item 19) |
 | G4 overfit | Full objective, batch 128, the run's learning rates, 256 fixed images. Within 3,000 VAE steps the reconstruction SSE (z = μ, unrotated) drops to ≤ 0.3 × the SSE of the all-zero image; all losses finite |
-| G4 outcome (2026-10-28) | Cross-entropy loss: ratio 0.923 → **0.416 at step 3,000** (criterion **not met** as measured; monotone, accelerating decrease, last drop 0.098 per 250 steps). **Accepted by the project owner** without a longer run, on the extrapolation that ≤ 0.3 is reached at about 3,300–3,500 steps (not measured). Records: `G4_20261028T054038Z.json` (measured), `G4_owner_acceptance_*.json` (decision) |
+| G4 outcome (2026-10-28) | Cross-entropy loss: ratio 0.923 → **0.416 at step 3,000** (criterion **not met** as measured; monotone, accelerating decrease, last drop 0.098 per 250 steps). **Accepted by the project owner** without a longer run, on the extrapolation that ≤ 0.3 is reached at about 3,300–3,500 steps (not measured). Records: `G4_20261028T054038Z.json` (measured), `G4_owner_acceptance_*.json` (decision). G3–G5 ran at B = 128 with the 128-batch learning rates; the V1 main-run setting (B = 5376, 6e-3 / 1.2e-3) has no gate of its own. It is watched through its loss curves and sample grids (notebook cell 10), with the paper's B = 896 as the fallback run |
 | G5 timing | 200 measured iterations on the full data after 20 warm-up: seconds/iteration, data-wait fraction, peak GPU memory, projected 300-epoch hours. Recorded, not thresholded |
 | G6 features | On ≥ 2,000 real images: \|L − n_frames\| ≤ 2 for ≥ 95 % and \|Δf − bandwidth_hz/93.75\| ≤ 1.5 bins for ≥ 95 % |
 
