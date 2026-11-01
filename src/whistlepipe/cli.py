@@ -45,6 +45,30 @@ def cmd_run(args) -> int:
     return 0 if summary["failed"] == 0 else 2
 
 
+def cmd_plot_waveform(args) -> int:
+    from . import dsp
+    from .plotting import plot_waveform
+
+    cfg = load_pipeline_config(args.config)
+    try:
+        if args.file:
+            path = audio.find_raw_file(cfg, args.file)
+        else:   # the val1 file, without listing the other encounters' folders (they need not be present)
+            v191 = audio.list_raw_files(project_path(cfg, "synth_raw_dir"))
+            path = audio.select_validation_files(v191, cfg["validation"]["phase1"])[0]
+    except FileNotFoundError as e:
+        raise SystemExit(str(e)) from e
+    s1 = audio.s1_select_channel(path, cfg)
+    s2 = dsp.s2_resample(s1, cfg)
+    out = Path(args.out) if args.out else PROJECT_ROOT / "docs" / "figures" / f"waveform_{path.stem}.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    r = plot_waveform(out, s1, s2, zoom_s=args.zoom_s, zoom_ms=args.zoom_ms,
+                      title=f"{path.name}: S1 load + S2 resample {s1.fs / 1e3:.0f} -> {s2.fs / 1e3:.0f} kHz")
+    print(json.dumps(r, indent=1))
+    print(f"figure: {out}")
+    return 0
+
+
 def cmd_validate_run(args) -> int:
     from .checks import verify_run
 
@@ -240,6 +264,13 @@ def main(argv=None) -> int:
     r.add_argument("--fail-fast", action="store_true")
     r.add_argument("--note", default="")
     r.set_defaults(fn=cmd_run)
+
+    pw = sub.add_parser("plot-waveform", help="waveform of one raw file (S1) and its resampled copy (S2) -> docs/figures/")
+    pw.add_argument("--file", default=None, help="raw file name or stem (default: the val1 file)")
+    pw.add_argument("--zoom-s", type=float, default=None, help="start of the zoom window in s (default: mid-file)")
+    pw.add_argument("--zoom-ms", type=float, default=2.0, help="length of the zoom window in ms")
+    pw.add_argument("--out", default=None, help="PNG path (default docs/figures/waveform_<stem>.png)")
+    pw.set_defaults(fn=cmd_plot_waveform)
 
     v = sub.add_parser("validate-run", help="automated lineage/output/consistency checks of a finished run")
     v.add_argument("--run-id", required=True)

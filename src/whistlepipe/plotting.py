@@ -8,6 +8,69 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from scipy import signal  # noqa: E402
+
+
+def _envelope(x: np.ndarray, n_bins: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Min/max of x in n_bins equal blocks (bin index, min, max): a whole file drawn without plotting every sample."""
+    n = len(x) // n_bins * n_bins
+    b = x[:n].reshape(n_bins, -1)
+    return np.arange(n_bins), b.min(1), b.max(1)
+
+
+def plot_waveform(path: Path, s1, s2, zoom_s: float | None = None, zoom_ms: float = 2.0, title: str = "") -> dict:
+    """S1 waveform of a whole file, a zoom with the S1 and S2 samples overlaid, and the S1 vs S2 power spectra
+    (Welch, equal frequency resolution). Returns the numbers shown, for the caller to print."""
+    fs1, fs2 = s1.fs, s2.fs
+    x1, x2 = np.asarray(s1.samples, np.float64), np.asarray(s2.samples, np.float64)
+    if zoom_s is None:
+        zoom_s = s1.duration_s / 2
+    z1 = slice(int(zoom_s * fs1), int((zoom_s + zoom_ms / 1e3) * fs1))
+    z2 = slice(int(np.ceil(zoom_s * fs2)), int((zoom_s + zoom_ms / 1e3) * fs2))
+    bin_hz = 62.5     # divides both rates: identical bin frequencies and segment lengths (8000 / 3072 samples).
+    f1, p1 = signal.welch(x1, fs1, nperseg=int(fs1 / bin_hz))   # Unequal segments (e.g. 8192 vs 3145.7) bias the
+    f2, p2 = signal.welch(x2, fs2, nperseg=int(fs2 / bin_hz))   # S2/S1 ratio by +0.3 dB on real, peaky spectra.
+    band = (f2 >= 2e3) & (f2 <= 80e3)
+    diff_db = 10 * np.log10(p2[band] / np.interp(f2[band], f1, p1))
+
+    fig, ax = plt.subplots(3, 1, figsize=(12, 10))
+    k, lo, hi = _envelope(x1, 3000)
+    t = (k + 0.5) * (len(x1) // 3000) / fs1
+    ax[0].fill_between(t, lo, hi, color="tab:blue", lw=0)
+    ax[0].axvspan(zoom_s, zoom_s + zoom_ms / 1e3, color="tab:red", alpha=0.4)
+    ax[0].set_title(f"S1: channel {s1.meta.get('channel_index', '?')} at {fs1 / 1e3:.0f} kHz, whole file "
+                    f"({s1.duration_s:.1f} s; min/max per {len(x1) // 3000} samples; red = zoom below)")
+    ax[0].set_xlabel("time in file (s)")
+    ax[1].plot((np.arange(z1.start, z1.stop) / fs1 - zoom_s) * 1e3, x1[z1], "-", lw=0.8, color="tab:blue",
+               label=f"S1 {fs1 / 1e3:.0f} kHz ({z1.stop - z1.start} samples)")
+    ax[1].plot((np.arange(z2.start, z2.stop) / fs2 - zoom_s) * 1e3, x2[z2], "o", ms=2.5, color="tab:orange",
+               label=f"S2 {fs2 / 1e3:.0f} kHz ({z2.stop - z2.start} samples)")
+    ax[1].set_title(f"Zoom {zoom_ms:g} ms at {zoom_s:.3f} s: original and resampled samples")
+    ax[1].set_xlabel(f"time after {zoom_s:.3f} s (ms)")
+    ax[1].legend(loc="upper right")
+    ax[2].plot(f1 / 1e3, 10 * np.log10(p1), lw=0.8, color="tab:blue", label=f"S1 {fs1 / 1e3:.0f} kHz")
+    ax[2].plot(f2 / 1e3, 10 * np.log10(p2), lw=0.8, color="tab:orange", label=f"S2 {fs2 / 1e3:.0f} kHz")
+    ax[2].axvline(fs2 / 2e3, ls="--", color="gray")
+    ax[2].text(fs2 / 2e3, ax[2].get_ylim()[1], f" S2 Nyquist {fs2 / 2e3:.0f} kHz", va="top", color="gray")
+    ax[2].set_title(f"Power spectrum (Welch, {bin_hz:g} Hz bins): median S2 - S1 over 2-80 kHz "
+                    f"= {np.median(diff_db):+.2f} dB")
+    ax[2].set_xlabel("frequency (kHz)")
+    ax[2].set_ylabel("dB / Hz")
+    ax[2].legend(loc="upper right")
+    for a in ax[:2]:
+        a.set_ylabel("amplitude (full scale = 1)")
+    fig.suptitle(title)
+    fig.tight_layout()
+    fig.savefig(path, dpi=110)
+    plt.close(fig)
+
+    def stats(x, fs):
+        return {"fs_hz": int(fs), "n_samples": len(x), "duration_s": round(len(x) / fs, 4),
+                "peak": round(float(np.abs(x).max()), 5), "rms": round(float(np.sqrt(np.mean(x ** 2))), 6)}
+
+    return {"file": s1.name, "channel": s1.meta.get("channel_index"), "s1": stats(x1, fs1), "s2": stats(x2, fs2),
+            "zoom": {"start_s": round(zoom_s, 4), "ms": zoom_ms},
+            "psd_median_diff_db_2_80khz": round(float(np.median(diff_db)), 3)}
 
 
 def plot_overview(path: Path, spec, dm, tr, cfg, title: str = "", seconds: float = 12.0) -> None:

@@ -77,6 +77,8 @@ python whistle.py run --run-id v2c_check2_val5 --set val5 --storage debug
 python whistle.py run --run-id v2c_check3_per_encounter --set per_encounter --storage debug
 python whistle.py validate-run --run-id v2c_check3_per_encounter   # automated gate: lineage, output validity, cross-stage counts
 python whistle.py report --run-id v2c_check3_per_encounter         # compact per-file table
+python whistle.py plot-waveform                    # S1 waveform of the val1 file, S1/S2 samples overlaid, S1 vs S2 spectra
+                                                   #   -> docs/figures/waveform_<stem>.png (--file <stem>, --zoom-s, --zoom-ms)
 python whistle.py build-dataset                    # FINAL dataset -> preprocessed/ (only after the checks pass; resumable)
 python whistle.py build-dataset --encounters 191 214   # a subset of encounters
 python whistle.py validate-dataset                 # automated checks of preprocessed/

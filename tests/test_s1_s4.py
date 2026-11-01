@@ -108,6 +108,19 @@ def test_s2_full_file_length_matches_spec(cfg):
     assert math.ceil(30_000_000 * up / down) == 11_520_000
 
 
+def test_plot_waveform_writes_figure_and_reports_resampling(cfg, fake_raw, tmp_path):
+    from whistlepipe.plotting import plot_waveform
+
+    s1 = audio.s1_select_channel(fake_raw, cfg)          # channel 0: 11 kHz tone, amplitude 0.2
+    s2 = dsp.s2_resample(s1, cfg)
+    out = tmp_path / "waveform.png"
+    r = plot_waveform(out, s1, s2, zoom_s=0.5, zoom_ms=1.0)
+    assert out.stat().st_size > 0
+    assert (r["s1"]["fs_hz"], r["s1"]["n_samples"]) == (500000, 500000)
+    assert (r["s2"]["fs_hz"], r["s2"]["n_samples"]) == (192000, 192000)
+    assert abs(r["s1"]["rms"] - 0.2 / np.sqrt(2)) < 1e-3 and abs(r["s2"]["rms"] - r["s1"]["rms"]) < 1e-3
+
+
 # ------------------------------------------------------------------ S3
 def test_s3_highpass_response(cfg):
     fs, n = 192000, 192000 * 2
