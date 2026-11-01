@@ -64,4 +64,4 @@ colab/dist/
 
 # Local tooling and unpublished explainer pages
 .claude/
-docs/
+docs/*.html
