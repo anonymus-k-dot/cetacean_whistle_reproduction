@@ -1,0 +1,38 @@
+{
+  "run_id": "V1_L64_b1e-4_critic_E191",
+  "status": "stopped_early",
+  "final_epoch": 101,
+  "final_checkpoint_sha256": "fcb1a2e69324e79c00d0dc319e25ef565499aaa785cc38ee5f02e6174a157665",
+  "data_check": {
+    "dataset_info_sha256": true,
+    "encounters": true,
+    "n_images": true,
+    "encounter_191/images.npy": true
+  },
+  "final_epoch_check": {
+    "healthy": true,
+    "epoch": 101,
+    "rec": 171.15458540482953,
+    "rec_median_before": 172.96042702414772,
+    "kl": 830.6060901988636,
+    "kl_median_before": 833.7776988636364
+  },
+  "latents": {
+    "path": "models/vaegmm/V1_L64_b1e-4_critic_E191/latents_mu.npy",
+    "shape": [
+      63490,
+      64
+    ],
+    "dtype": "float32",
+    "all_finite": true,
+    "sha256": "8f0ec4d5efde72b621e00ccc9d4589983aff2a68e5e8d24a3a88805543db6070",
+    "mean_abs_of_dim_means": 2.057218074798584,
+    "dim_std_min": 0.5957426428794861,
+    "dim_std_median": 2.343921184539795,
+    "dim_std_max": 8.397642135620117,
+    "n_dims_std_below_0.01": 0,
+    "overall_std": 4.291711807250977,
+    "encode_wall_s": 41.5,
+    "device": "cuda"
+  }
+}

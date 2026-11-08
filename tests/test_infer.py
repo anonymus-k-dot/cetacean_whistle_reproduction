@@ -1,6 +1,7 @@
 """Inference engine: upload reading, the S2-S9 path, and the model step with randomly initialised files saved in the
 exact formats training writes (so a real last.pt / gmm.npz dropped into place takes the same code path)."""
 import json
+import shutil
 
 import numpy as np
 import pytest
@@ -48,7 +49,7 @@ def write_random_model(runs_dir, gmm=True, comp_feats=True, epoch=300):
           "spec": {"run_id": RUN, "latent_dim": 64, "beta": 1e-4, "use_critic": True, "epochs": 300}}
     torch.save(st, ck / "last.pt")
     if epoch == 300:
-        torch.save(st, ck / "final.pt")
+        shutil.copyfile(ck / "last.pt", ck / "final.pt")      # as train.py: final.pt is a byte copy of last.pt
     if not gmm:
         return
     g = GaussianMixtureEM(K, device="cpu", verbose=False)
@@ -205,6 +206,21 @@ def test_mid_training_checkpoint_is_labelled(tmp_path):
     (tmp_path / "done").mkdir()
     done = make_engine(tmp_path / "done", gmm=False).model.status
     assert done["vae"]["epoch"] == 300 and not done["vae"]["in_training"] and "epoch" not in done["message"]
+    assert done["vae"]["final"] and not done["vae"]["stopped_early"]
+
+
+def test_finalised_early_stop_is_not_labelled_in_training(tmp_path):
+    """A run stopped before its planned epochs and finalised (final.pt = last.pt) is the final model, not a snapshot."""
+    make_engine(tmp_path, gmm=False, epoch=6)
+    ck = tmp_path / "runs" / RUN / "checkpoints"
+    shutil.copyfile(ck / "last.pt", ck / "final.pt")
+    st = make_engine(tmp_path).model.status
+    assert st["vae"]["final"] and st["vae"]["stopped_early"] and not st["vae"]["in_training"]
+    assert st["message"].startswith("VAE trained for 6 of the 300 planned epochs (stopped early; final model).")
+    # a final.pt that is not the loaded checkpoint does not count
+    torch.save({"other": 1}, ck / "final.pt")
+    st = make_engine(tmp_path).model.status
+    assert not st["vae"]["final"] and st["vae"]["in_training"]
 
 
 # ----------------------------------------------------------------------------- generation

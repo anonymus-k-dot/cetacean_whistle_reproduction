@@ -72,6 +72,8 @@ lr_critic       = 2.857142857142857e-5    # [DEVIATION] 2e-4 x 128/896
 # The four values above are the laptop-gate defaults; the Colab run overrides them (batch 5772, learning rates 6.442e-3 / 1.288e-3).
 encounters      = [191]                   # [DEVIATION, owner 2026-11-02] train on encounter 191 only (363 files, 63,490 images); other encounters stay on disk, unused
 epochs          = 150                     # [DEVIATION, owner 2026-11-02] paper 300; fewer compute units
+                                          # [DEVIATION, owner 2026-11-08] the V1 run was stopped after epoch 101 and not resumed:
+                                          # its final model is epoch 101 (post_training/finalize_run.py; spec §2.1). 150 stays the planned value
 n_components    = 3000                    # [DEVIATION, owner 2026-11-02] paper K = 10,000; 21.2 images per component vs the paper's 22.9
 
 # ---------------------------------------------------------------- IMPLEMENTATION DECISIONS (paper silent)

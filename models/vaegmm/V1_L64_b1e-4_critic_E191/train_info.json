@@ -1,5 +1,5 @@
 {
-  "status": "running",
+  "status": "stopped_early",
   "spec": {
     "run_id": "V1_L64_b1e-4_critic_E191",
     "latent_dim": 64,
@@ -342,5 +342,28 @@
   },
   "decoder_table6_flops": 557318144,
   "steps_per_epoch": 11,
-  "started_utc": "2026-11-03T04:49:28Z"
+  "started_utc": "2026-11-03T04:49:28Z",
+  "epochs_planned": 150,
+  "epochs_trained": 101,
+  "final_epoch": 101,
+  "final_global_step": 1111,
+  "final_checkpoint": "checkpoints/final.pt = byte copy of checkpoints/last.pt",
+  "final_checkpoint_sha256": "fcb1a2e69324e79c00d0dc319e25ef565499aaa785cc38ee5f02e6174a157665",
+  "stopped": {
+    "by": "owner",
+    "decision_date": "2026-11-08",
+    "status_before": "running",
+    "note": "Colab cell 9 stopped during epoch 102 on 2026-11-03 (last write to the Drive run folder 13:55 IST). The owner chose not to resume to the planned 150 epochs; final.pt is the last finished epoch (no model selection). The Drive copy was checked byte-identical to this folder on 2026-11-08.",
+    "log_tail": "train_log.jsonl ends with 1 step line(s) of the unfinished epoch 102 (no summary, no checkpoint); readers use epoch summaries only"
+  },
+  "final_epoch_check": {
+    "healthy": true,
+    "epoch": 101,
+    "rec": 171.15458540482953,
+    "rec_median_before": 172.96042702414772,
+    "kl": 830.6060901988636,
+    "kl_median_before": 833.7776988636364
+  },
+  "finalized_utc": "2026-11-08T17:14:27Z",
+  "finalized_by": "post_training/finalize_run.py"
 }

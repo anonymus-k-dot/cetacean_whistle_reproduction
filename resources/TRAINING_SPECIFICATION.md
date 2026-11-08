@@ -69,7 +69,7 @@ The goal is fewer Colab compute units, with one training run only.
 | Item | Paper | Earlier plan | This run |
 |---|---|---|---|
 | Training data | 228,673 images from 2,486 files | 180,154 images, 8 encounters, 1,415 files | **Encounter 191 only: 63,490 images, 363 files** |
-| Epochs | 300 | 300 | **150** |
+| Epochs | 300 | 300 | **150 planned; stopped by the owner after epoch 101** (final model = epoch 101: 1,111 VAE + 3,333 critic updates) |
 | Batch | 896 | 5376 | **5772** on an 80 GB A100: 11 steps per epoch, 1,650 VAE + 4,950 critic updates |
 | Learning rates (VAE / critic) | 1e-3 / 2e-4 | 6e-3 / 1.2e-3 | **6.442e-3 / 1.288e-3** (lr × B / 896) |
 | K | 10,000 | 10,000 | **3,000**: 21.2 images per component (paper 22.9). Chosen by this ratio, not by the Fig. 11 scores |
@@ -79,6 +79,7 @@ The goal is fewer Colab compute units, with one training run only.
 - **Rec reference levels** (20k rotated sample, encounter 191): 421.9 = always the average image, 141.6 = a perfect reconstruction. All-data levels were 449.2 and 151.9.
 - **Check at epoch 40** (440 updates) [DECISION]: rec below about 395, and samples no longer all the same blob.
 - **Check of the last epoch** [DECISION]: `final.pt` is always the last epoch, so notebook cell 11 encodes it only if its rec is within 5 % and its KL within a factor of 2 of the median of the 10 epochs before it (`check_final_epochs`). Otherwise the owner decides; choosing an earlier checkpoint would be a reported deviation.
+- **Early stop (owner decision, 2026-11-08)** [DEVIATION]: Colab cell 9 stopped during epoch 102 on 2026-11-03, and the owner chose not to resume. The final model is the last finished epoch, 101 (no model selection), so `post_training/finalize_run.py` copied `last.pt` to `final.pt` byte for byte and set `train_info.json` to `stopped_early` (with `epochs_planned` 150, `epochs_trained` 101, the SHA-256 and the note). The Drive run folder was checked byte-identical to the local copy. Epoch 101 passes the last-epoch check (rec 171.15 vs median 172.96; KL 830.6 vs 833.8). rec was still falling slowly (−0.24 per epoch over epochs 92–101); the learning rate is constant, so no schedule is cut short. Every result of this run reports 101 epochs.
 - **Projected cost:** about 5.3 h and 62 compute units, scaled from 10.75 s per step at B = 5376. Notebook cell 8 measures it.
 - **Gates on encounter 191 (laptop, 2026-11-02):** G1, G2, G3 and G6 passed. G5 is replaced by notebook cell 8 on the A100. G4 was not rerun, so its 2026-10-28 result and owner acceptance stand: it tests the model and loss at B = 128, and neither changed.
 
@@ -267,7 +268,7 @@ Sweeps never start before V1 has finished and been evaluated.
 | Feature-network weights | download code present (`fetch-eval-weights --approved`); **not downloaded** (approval pending) |
 | Measured cost | EM at K = 10k on 180,154 × 64 latents: ≈ 17 s per iteration on the RTX 5060 Laptop (memory-bound), so ≤ ≈ 7 h per 1,500-iteration fit. VAE training: gate G5 measured 0.56 s per iteration at B = 128 with the critic on the laptop (66 h projected for 300 epochs); the V1 main run takes about 6 min per epoch on a Colab A100 80 GB (≈ 30 h) |
 | Gates (laptop, B = 128) | G1, G2, G5, G6 passed 2026-10-22; G3 passed 2026-10-28 with the revised criterion (item 19); G4 not met as measured and accepted by the project owner 2026-10-28 (§4); G1, G2, G3 and G6 passed again on encounter 191 on 2026-11-02 (§2.1) |
-| V1 main run | Encounter-191 run (§2.1) on a Colab A100 80 GB, commit `7eb7a1a`: log ends in epoch 102, last finished epoch 101 (rec 171.2, step 1,111), 127.9 s per epoch, peak GPU memory 60.2 GiB. No `final.pt`, so `train_info.json` still says `running`. One KL spike at epoch 34 recovered by epoch 38. G1 and G2 passed on the A100. The earlier all-data run stopped at epoch 7 (`models/vaegmm/V1_L64_b1e-4_critic/`) and is not used. No GMM fit or evaluation result exists yet |
+| V1 main run | Encounter-191 run (§2.1) on a Colab A100 80 GB, commit `7eb7a1a`: log ends in epoch 102, last finished epoch 101 (rec 171.2, step 1,111), 127.9 s per epoch, peak GPU memory 60.2 GiB. One KL spike at epoch 34 recovered by epoch 38. G1 and G2 passed on the A100. Stopped early by the owner (§2.1): final model = epoch 101, finalised 2026-11-08 (`train_info.json` status `stopped_early`, `final.pt` SHA-256 `fcb1a2e6…`). Latents encoded on the laptop RTX 5060 (63,490 × 64, 42 s; `post_training/out/cell11_report.json`). The earlier all-data run stopped at epoch 7 (`models/vaegmm/V1_L64_b1e-4_critic/`) and is not used. No GMM fit or evaluation result exists yet |
 
 ## 4. Validation gates (all must pass before the main run)
 

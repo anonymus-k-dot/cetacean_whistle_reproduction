@@ -137,10 +137,18 @@ def load_model(icfg: Cfg, vcfg: Cfg, device: torch.device) -> Model:
     else:
         st["message"] = f"Model {st['run_id']} loaded (K = {m.gmm.K})."
     epoch, epochs = st["vae"].get("epoch"), st["vae"].get("spec", {}).get("epochs")
-    st["vae"]["in_training"] = ok_v and epoch is not None and epochs is not None and epoch < epochs
+    # the loaded checkpoint is the final model if it is final.pt byte for byte (train_vae at the last planned epoch, or
+    # post_training/finalize_run.py for a run the owner stopped early)
+    final = p["run_dir"] / "checkpoints" / "final.pt"
+    st["vae"]["final"] = ok_v and final.exists() and sha256_file(final) == st["vae"].get("sha256")
+    short = ok_v and epoch is not None and epochs is not None and epoch < epochs
+    st["vae"]["in_training"] = short and not st["vae"]["final"]
+    st["vae"]["stopped_early"] = short and st["vae"]["final"]
     if st["vae"]["in_training"]:
         st["message"] = (f"VAE checkpoint from epoch {epoch} of {epochs}: training is still running, "
                          f"so the recreations are provisional. ") + st["message"]
+    elif st["vae"]["stopped_early"]:
+        st["message"] = f"VAE trained for {epoch} of the {epochs} planned epochs (stopped early; final model). " + st["message"]
     for k in ("vae", "gmm", "component_features"):
         if st[k]["error"]:
             st["message"] += f" {k} failed to load: {st[k]['error']}"

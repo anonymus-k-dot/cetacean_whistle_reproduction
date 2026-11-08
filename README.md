@@ -9,10 +9,12 @@ Preprocessing implements S1–S9 of `resources/PREPROCESSING_SPECIFICATION.md` (
 from it is repeated here beyond what is needed to run and extend the code). The VAE-GMM training, GMM fitting and
 evaluation (`src/whistlepipe/vaegmm/`) follow `resources/TRAINING_SPECIFICATION.md` (see "VAE-GMM" below).
 
-**Status (2026-11-03):** the dataset is built (180,154 images from 8 encounters, see "Dataset record"). The main model
-V1 trains on encounter 191 only (363 files, 63,490 images), planned for 150 epochs, with K = 3,000; the other encounters
-stay on disk, unused (`resources/TRAINING_SPECIFICATION.md` §2.1). Its log ends in epoch 102; the last finished epoch is 101
-(rec 171.2), saved as `models/vaegmm/V1_L64_b1e-4_critic_E191/checkpoints/last.pt`. There is no `final.pt`, GMM fit or evaluation result yet.
+**Status (2026-11-08):** the dataset is built (180,154 images from 8 encounters, see "Dataset record"). The main model
+V1 is trained on encounter 191 only (363 files, 63,490 images) with K = 3,000; the other encounters stay on disk, unused
+(`resources/TRAINING_SPECIFICATION.md` §2.1). It was planned for 150 epochs; the owner stopped it after epoch 101 (rec 171.2)
+and did not resume, so the final model is epoch 101 (`checkpoints/final.pt` = `last.pt`, `train_info.json` status
+`stopped_early`; a reported deviation). Its latents are encoded (`latents_mu.npy`, 63,490 x 64, `post_training/`). There is no
+GMM fit or evaluation result yet.
 
 > **Research-integrity statement.** The paper's S5 detector (its reference [31]) and S6 tracker (refs [32], [33]) are
 > unavailable. This project does **not** reproduce them. S5 and S6 here are **newly designed replacements** that satisfy the
@@ -41,6 +43,7 @@ src/whistlepipe/       audio.py(S1) dsp.py(S2-S4) detector/(S5) tracking.py(S6) 
 configs/inference.toml inference / web demo settings (not part of any training or processing hash)
 web/                   the project webpage (scroll film + "Try it"); web/media4k/*.mp4 and web/data/ are not in git
 colab/                 Colab notebook for the main VAE training + make_colab_bundle.py (its output colab/dist/ is not in git)
+post_training/         laptop versions of notebook cells 10-11 + finalize_run.py (closes a run stopped early); out/ = their records
 tests/                 pytest, small synthetic fixtures; none needs the full dataset
 models/detector/<ver>/ checkpoint.pt, train_info.json, calibration.json, eval_*.json
 models/vaegmm/<run_id>/  VAE runs: train_info.json, train_log.jsonl, sample grids (checkpoints/ not in git); _gates/ = gate records
@@ -271,8 +274,12 @@ Authoritative: `resources/TRAINING_SPECIFICATION.md` (discrepancy report, correc
 gates); configuration `configs/vaegmm.toml` (its `[paper]` section is locked in `vaegmm/config.py`). Deviations from
 stated paper values: the batch size on one GPU (paper 7 x 128 = 896) with learning rates scaled linearly, lr x B / 896, and
 the reduced scope below (spec §2.1).
-* **Main run V1** (Colab A100 80 GB): encounter 191 only, 150 epochs, **B = 5772, lr 6.442e-3 (VAE) / 1.288e-3 (critic)**, 11 steps
-  per epoch, projected about 5.3 h. It also uses cuDNN autotuning (same maths, not bit-deterministic; spec §3.9). GMM at K = 3,000.
+* **Main run V1** (Colab A100 80 GB): encounter 191 only, 150 epochs planned, **stopped by the owner after epoch 101** (final
+  model = epoch 101), **B = 5772, lr 6.442e-3 (VAE) / 1.288e-3 (critic)**, 11 steps per epoch, 127.9 s per epoch. It also uses
+  cuDNN autotuning (same maths, not bit-deterministic; spec §3.9). GMM at K = 3,000.
+* **After training, on the laptop** (`post_training/`, the Colab notebook's cells 10-11): `finalize_run.py` closes a run stopped
+  early (final.pt = byte copy of last.pt, train_info.json status `stopped_early`); `cell10_progress.py` writes the loss curves to
+  `post_training/out/`; `cell11_check_encode.py` checks the data lineage and the last epoch, then encodes `latents_mu.npy`.
   Its fallback run `V1_L64_b1e-4_critic_E191_B896` uses the paper's batch and learning rates. The earlier all-data run
   `V1_L64_b1e-4_critic` (B = 5376) stopped at epoch 7 and is not used.
 * **Laptop gates and the `configs/vaegmm.toml` default:** B = 128, 1.4286e-4 / 2.8571e-5.
@@ -319,7 +326,7 @@ The trained files are read from where the training commands write them; nothing 
 
 | File | Written by | Enables |
 |---|---|---|
-| `models/vaegmm/V1_L64_b1e-4_critic_E191/checkpoints/last.pt` | `train-vae --experiment V1` (every epoch; equals `final.pt` at the end) | recreation (decoder of the encoder mean); a mid-training checkpoint is labelled as such |
+| `models/vaegmm/V1_L64_b1e-4_critic_E191/checkpoints/last.pt` | `train-vae --experiment V1` (every epoch; equals `final.pt` at the end, or after `post_training/finalize_run.py` for a run stopped early) | recreation (decoder of the encoder mean); a mid-training checkpoint is labelled as such |
 | `models/vaegmm/V1_L64_b1e-4_critic_E191/gmm_K3000/gmm.npz` + `gmm.json` | `fit-gmm --experiment V1` | whistle type (eqs. 11-12), new whistles of that type, generation |
 | `models/vaegmm/V1_L64_b1e-4_critic_E191/gmm_K3000/component_features.npy` | `vae-eval components --experiment V1` | generation under a Table 3 condition (eqs. 9-10 + rejection) |
 
