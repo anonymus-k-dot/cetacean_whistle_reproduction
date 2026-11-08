@@ -1,0 +1,94 @@
+{
+  "run_id": "V1_L64_b1e-4_critic_E191",
+  "gmm_dir": "models/vaegmm/V1_L64_b1e-4_critic_E191/gmm_K3000",
+  "K": 3000,
+  "tag": "",
+  "fit": {
+    "n_components": 3000,
+    "reg_rel": 1e-06,
+    "reg_abs": 9.335088513388787e-06,
+    "max_iter": 1500,
+    "tol": 1e-08,
+    "tol_mode": "relative_mean_loglik",
+    "empty_nk": 1.0,
+    "seed": 20261022,
+    "converged": true,
+    "n_iter": 111,
+    "final_mean_loglik": 221.71002066884571,
+    "fit_wall_s": 259.9,
+    "gmm_npz_sha256": "d8087ed21f42056e404e9af778b50bfa5915edad26b539fe293cabd93d74edd7",
+    "gmm_npz_mb": 99.9
+  },
+  "loglik": {
+    "first": 220.58783060765714,
+    "last": 221.71000689291583,
+    "n_iterations_logged": 111,
+    "n_decreasing_steps": 7,
+    "largest_relative_drop": 9.778184323055579e-08,
+    "last_relative_change": 7.255756835852928e-09,
+    "gain_last_100_iterations": 0.14089472391114555,
+    "max_n_frozen": 0,
+    "n_frozen_last": 0
+  },
+  "diagnostics": {
+    "weights_min": 1.5750510564649515e-05,
+    "weights_max": 0.008988115815473608,
+    "eig_min": 7.534507667101252e-06,
+    "eig_max": 200.6540434171561,
+    "reg_abs": 9.335088513388787e-06,
+    "frac_eigs_at_ridge": 0.7275989583333333,
+    "n_points": 63490,
+    "nk_quantiles_0_5_50_95_100": [
+      0.9999999157495977,
+      0.9999999157495977,
+      9.999999157495978,
+      74.06257280568329,
+      570.6554731244194
+    ],
+    "n_components_nk_lt_1": 0,
+    "n_components_nk_lt_2": 220,
+    "n_components_nk_lt_65": 2796
+  },
+  "map_assignment": {
+    "n_components_map_of_at_least_one_whistle": 3000,
+    "map_count_quantiles_0_50_95_100": [
+      1.0,
+      10.0,
+      74.04999999999973,
+      570.0
+    ],
+    "responsibility_of_map_median": 1.0,
+    "frac_whistles_responsibility_above_0.99": 0.9782170420538667
+  },
+  "memorisation_latent": {
+    "nn_distance_median_training_leave_one_out": 1.9403944209161417,
+    "nn_distance_median_gmm_samples": 1.9837564506844534,
+    "nn_distance_median_prior_samples": 25.150600934468528,
+    "ratio_median_gmm_to_training": 1.022347018369512,
+    "frac_gmm_samples_nearer_than_5pct_of_training_nn": 0.01256890848952591,
+    "note": "Euclidean, latent means; n samples = n training latents; ratio << 1 means samples sit on training latents"
+  },
+  "decoded_features": {
+    "FFD_real_vs_gmm": 4.630885346990453,
+    "FFD_real_vs_prior": 22161.023542418647,
+    "frac_with_contour_real": 1.0,
+    "frac_with_contour_gmm": 1.0,
+    "frac_with_contour_prior": 1.0,
+    "median_L_real_gmm_prior": [
+      35.0,
+      37.0,
+      128.0
+    ],
+    "note": "7 whistle features (threshold 0.05) of n decoded samples; FFD = Fr\u00e9chet distance"
+  },
+  "checks": {
+    "files_present": true,
+    "latents_match": true,
+    "n_components": true,
+    "loglik_finite": true,
+    "loglik_no_drop_gt_1e-6_rel": true,
+    "covariances_positive_definite": true,
+    "gmm_features_closer_to_real_than_prior": true
+  },
+  "passed": true
+}

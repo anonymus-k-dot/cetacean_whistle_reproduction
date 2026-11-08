@@ -13,8 +13,9 @@ evaluation (`src/whistlepipe/vaegmm/`) follow `resources/TRAINING_SPECIFICATION.
 V1 is trained on encounter 191 only (363 files, 63,490 images) with K = 3,000; the other encounters stay on disk, unused
 (`resources/TRAINING_SPECIFICATION.md` §2.1). It was planned for 150 epochs; the owner stopped it after epoch 101 (rec 171.2)
 and did not resume, so the final model is epoch 101 (`checkpoints/final.pt` = `last.pt`, `train_info.json` status
-`stopped_early`; a reported deviation). Its latents are encoded (`latents_mu.npy`, 63,490 x 64, `post_training/`). There is no
-GMM fit or evaluation result yet.
+`stopped_early`; a reported deviation). Its latents are encoded (`latents_mu.npy`, 63,490 x 64, `post_training/`) and the GMM
+is fitted at K = 3,000 (`gmm_K3000/`: converged in 111 iterations, post-fit check passed; `gmm.npz` is not in git, it is backed
+up in the Drive run folder). Ridge sensitivity: x10 fitted, x0.1 not feasible (spec §3.5). There is no evaluation result yet.
 
 > **Research-integrity statement.** The paper's S5 detector (its reference [31]) and S6 tracker (refs [32], [33]) are
 > unavailable. This project does **not** reproduce them. S5 and S6 here are **newly designed replacements** that satisfy the
@@ -277,11 +278,13 @@ the reduced scope below (spec §2.1).
 * **Main run V1** (Colab A100 80 GB): encounter 191 only, 150 epochs planned, **stopped by the owner after epoch 101** (final
   model = epoch 101), **B = 5772, lr 6.442e-3 (VAE) / 1.288e-3 (critic)**, 11 steps per epoch, 127.9 s per epoch. It also uses
   cuDNN autotuning (same maths, not bit-deterministic; spec §3.9). GMM at K = 3,000.
-* **After training, on the laptop** (`post_training/`, the Colab notebook's cells 10-11): `finalize_run.py` closes a run stopped
-  early (final.pt = byte copy of last.pt, train_info.json status `stopped_early`); `cell10_progress.py` writes the loss curves to
-  `post_training/out/`; `cell11_check_encode.py` checks the data lineage and the last epoch, then encodes `latents_mu.npy`.
-  Its fallback run `V1_L64_b1e-4_critic_E191_B896` uses the paper's batch and learning rates. The earlier all-data run
-  `V1_L64_b1e-4_critic` (B = 5376) stopped at epoch 7 and is not used.
+  Its fallback run `V1_L64_b1e-4_critic_E191_B896` (never started) uses the paper's batch and learning rates. The earlier
+  all-data run `V1_L64_b1e-4_critic` (B = 5376) stopped at epoch 7 and is not used.
+* **After training, on the laptop** (`post_training/`, the Colab notebook's cells 10-11 and the GMM check): `finalize_run.py`
+  closes a run stopped early (final.pt = byte copy of last.pt, train_info.json status `stopped_early`); `cell10_progress.py`
+  writes the loss curves to `post_training/out/`; `cell11_check_encode.py` checks the data lineage and the last epoch, then
+  encodes `latents_mu.npy`; `gmm_check.py [--tag T]` checks a fit after `fit-gmm` (spec §3.5 diagnostics, pass criteria in
+  its docstring) and writes `post_training/out/gmm_check_K<K>[_T].json` + three figures.
 * **Laptop gates and the `configs/vaegmm.toml` default:** B = 128, 1.4286e-4 / 2.8571e-5.
 
 Every run's actual values are in its `train_info.json` (`spec`, `deviations`, `runtime`).
@@ -291,7 +294,8 @@ python whistle.py vae-gates                               # gates that do not tr
 python whistle.py vae-gates --gate all --allow-training   # + G3 smoke, G4 overfit, G5 timing (short trainings)
 python whistle.py train-vae --experiment V1               # main model, 150 epochs on encounter 191 (--resume continues an interrupted run)
 # Colab A100: colab/train_V1_colab.ipynb (code bundle: python colab/make_colab_bundle.py)
-python whistle.py fit-gmm --experiment V1 --K 3000        # encode unrotated means, full-covariance EM (at most about 45 min)
+python whistle.py fit-gmm --experiment V1 --K 3000        # encode unrotated means, full-covariance EM (V1: 111 iterations, 4.3 min on the RTX 5060)
+python post_training/gmm_check.py                         # post-fit check of that fit (--tag for the ridge-sensitivity fits)
 python whistle.py vae-eval recon --experiment V1          # Table 1
 python whistle.py fetch-eval-weights --approved           # Inception-V3 + VGG-16 weights (only after approval)
 python whistle.py vae-eval gen --experiment V1 --K 10000  # Table 2 (FID1, FID2, P/R/F1); --source prior for Table 4 (1)

@@ -89,6 +89,36 @@ def test_ridge_keeps_degenerate_components_positive_definite_and_save_load(tmp_p
     assert json.loads((tmp_path / "gmm.json").read_text())["note"] == "test"
 
 
+def test_diagnostics_count_one_point_components_with_rounding_tolerance():
+    """Renormalised weights put a one-point component at N_k = 0.9999999: it holds a point, so it is not N_k < 1."""
+    g = GaussianMixtureEM(3, device="cpu", verbose=False)
+    g.weights_ = torch.tensor([0.0999999, 0.4, 0.5000001], dtype=torch.float64)     # N = 10: 0.999999, 4, 5.000001 points
+    g.means_ = torch.zeros(3, 2, dtype=torch.float64)
+    g.covariances_ = torch.eye(2, dtype=torch.float64).repeat(3, 1, 1)
+    g.reg_ = 1e-6
+    d = g.diagnostics(10)
+    assert d["n_components_nk_lt_1"] == 0 and d["n_components_nk_lt_2"] == 1 and d["n_components_nk_lt_3"] == 1
+
+
+def test_fit_gmm_sets_deterministic_mode_and_never_overwrites(tmp_path, monkeypatch):
+    from whistlepipe.vaegmm import evaluate as ev
+    from whistlepipe.vaegmm.config import load_vaegmm_config
+
+    run = tmp_path / "R"
+    (run / "checkpoints").mkdir(parents=True)
+    (run / "checkpoints" / "final.pt").write_bytes(b"stand-in")      # fit_gmm only needs it to exist (latents are present)
+    np.save(run / "latents_mu.npy", blobs(300)[0])
+    calls = []
+    monkeypatch.setattr(ev, "set_deterministic", lambda: calls.append("det"))
+    cfg = load_vaegmm_config(overrides=[f"paths.runs_dir='{tmp_path.as_posix()}'", 'train.device="cpu"'])
+    gd = ev.fit_gmm(cfg, "R", 3)
+    assert calls == ["det"] and (gd / "gmm.npz").exists() and (gd / "fit_log.jsonl").exists()
+    meta = json.loads((gd / "gmm.json").read_text())
+    assert meta["n_components"] == 3 and "n_components_nk_lt_2" in meta["diagnostics"]
+    with pytest.raises(FileExistsError):
+        ev.fit_gmm(cfg, "R", 3)
+
+
 def test_kmeanspp_seeds_are_distinct_and_deterministic():
     X, _ = blobs(500)
     t = torch.from_numpy(X)

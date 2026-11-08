@@ -76,6 +76,7 @@ def fit_gmm(cfg, run_id: str, K: int, reg_rel: float | None = None, seed: int | 
     if (gd / "gmm.npz").exists():
         raise FileExistsError(f"{gd / 'gmm.npz'} exists; GMM fits are never overwritten (use --tag)")
     gd.mkdir(parents=True, exist_ok=True)
+    set_deterministic()      # encode() sets it only when it encodes; without it two GPU fits from the same seed differ
     mu = np.load(encode(cfg, run_id))
     dev = resolve_device(cfg["train"]["device"])
     p, dg = cfg["paper"], cfg["decisions"]["gmm"]
@@ -244,6 +245,7 @@ def eval_generation(cfg, run_id: str, source: str = "gmm", K: int | None = None,
 # ---------------------------------------------------------------- Fig. 11
 def eval_clustering(cfg, run_id: str, Ks: list[int], force: bool = False) -> Path:
     d = _run(cfg, run_id)
+    set_deterministic()
     mu = np.load(encode(cfg, run_id))
     dev = resolve_device(cfg["train"]["device"])
     rows = []
@@ -263,6 +265,7 @@ def analyze_components(cfg, run_id: str, K: int | None = None) -> Path:
     if out.exists():
         return out
     d = _run(cfg, run_id)
+    set_deterministic()
     dev = resolve_device(cfg["train"]["device"])
     vae, _ = load_trained_vae(d, dev)
     gmm = load_gmm(cfg, run_id, K)

@@ -257,6 +257,9 @@ class GaussianMixtureEM:
         if n_points:
             nk = w * n_points
             d = self.means_.shape[1]
+            # N_k = pi_k N: renormalising the float32 responsibilities puts a one-point component at 0.9999999, so the counts
+            # use a relative rounding tolerance (lt_2 = components holding at most one point's worth)
+            lt = lambda t: int((nk < t * (1 - 1e-6)).sum())   # noqa: E731
             out.update({"n_points": int(n_points), "nk_quantiles_0_5_50_95_100": np.quantile(nk, [0, .05, .5, .95, 1]).tolist(),
-                        "n_components_nk_lt_1": int((nk < 1).sum()), f"n_components_nk_lt_{d + 1}": int((nk < d + 1).sum())})
+                        "n_components_nk_lt_1": lt(1), "n_components_nk_lt_2": lt(2), f"n_components_nk_lt_{d + 1}": lt(d + 1)})
         return out

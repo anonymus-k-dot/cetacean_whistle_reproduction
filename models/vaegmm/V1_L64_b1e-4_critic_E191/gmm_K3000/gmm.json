@@ -1,0 +1,56 @@
+{
+  "n_components": 3000,
+  "reg_rel": 1e-06,
+  "reg_abs": 9.335088513388787e-06,
+  "max_iter": 1500,
+  "tol": 1e-08,
+  "tol_mode": "relative_mean_loglik",
+  "empty_nk": 1.0,
+  "seed": 20261022,
+  "converged": true,
+  "n_iter": 111,
+  "final_mean_loglik": 221.71002066884571,
+  "init": {
+    "method": "kmeans++ seeds -> nearest-seed assignment -> M-step",
+    "seed": 20261022,
+    "empty_after_assignment": 0
+  },
+  "run_id": "V1_L64_b1e-4_critic_E191",
+  "latents_sha256": "8f0ec4d5efde72b621e00ccc9d4589983aff2a68e5e8d24a3a88805543db6070",
+  "fit_wall_s": 259.9,
+  "diagnostics": {
+    "weights_min": 1.5750510564649515e-05,
+    "weights_max": 0.008988115815473608,
+    "eig_min": 7.534507667101252e-06,
+    "eig_max": 200.6540434171561,
+    "reg_abs": 9.335088513388787e-06,
+    "frac_eigs_at_ridge": 0.7275989583333333,
+    "n_points": 63490,
+    "nk_quantiles_0_5_50_95_100": [
+      0.9999999157495977,
+      0.9999999157495977,
+      9.999999157495978,
+      74.06257280568329,
+      570.6554731244194
+    ],
+    "n_components_nk_lt_1": 0,
+    "n_components_nk_lt_2": 220,
+    "n_components_nk_lt_65": 2796
+  },
+  "software": {
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "soundfile": "0.13.1",
+    "libsndfile": "1.2.2",
+    "git_commit": "c4ac1b3514e67719badf4dc0a419c9116b18485f",
+    "git_uncommitted_code_changes": true,
+    "torch": "2.14.0+cu130",
+    "cuda_available": true,
+    "tf32_conv_allowed": false,
+    "tf32_matmul_allowed": false,
+    "deterministic_algorithms": true,
+    "cuda_device": "NVIDIA GeForce RTX 5060 Laptop GPU"
+  }
+}

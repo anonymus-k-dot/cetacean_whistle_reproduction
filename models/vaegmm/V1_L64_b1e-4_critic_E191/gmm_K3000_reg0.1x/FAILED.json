@@ -1,0 +1,11 @@
+{
+  "run_id": "V1_L64_b1e-4_critic_E191",
+  "command": "python whistle.py fit-gmm --experiment V1 --K 3000 --reg-rel 1e-7 --tag reg0.1x",
+  "date": "2026-11-08",
+  "purpose": "ridge sensitivity x0.1 (spec section 3.5), reported only, not used for selection",
+  "reg_rel": 1e-07,
+  "reg_abs": 9.335088513388787e-07,
+  "outcome": "failed at the start of iteration 2 (after the first M-step): numpy.linalg.LinAlgError: covariance not positive definite for components [79, 92, 143, 409, 458, 475, 526, 599, 624, 678] (first 10)",
+  "cause": "The M-step covariance moments are computed per chunk by a float32 matrix product (accumulated across chunks in float64), so covariance entries carry errors of about 1e-6 in the directions where a component has no spread (2,796 of 3,000 components have fewer than 65 points). A ridge of 9.3e-7 is below that noise and leaves negative eigenvalues; the default ridge 9.3e-6 is above it (the main fit's smallest eigenvalue, 7.5e-6, is 1.8e-6 below its ridge, which shows the noise level).",
+  "fit_log": "fit_log.jsonl holds the one finished iteration; no gmm.npz was written, so this folder is a record only"
+}
