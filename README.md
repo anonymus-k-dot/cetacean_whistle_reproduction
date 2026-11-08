@@ -22,7 +22,8 @@ reproduced (every diagonal entry is its row's minimum), but recall, precision an
 90-94 %). Figs. 7-10 are made (`figures/`). Table 6: decoder size matches the paper (368,097 parameters, 557.3 MFLOPs);
 with the paper's 0.5 s pause the laptop GPU wakes from idle on every trial, so a warm supplement is reported too (B = 16:
 0.120 ms per image warm vs the paper's 0.11 ms). Side by side with the paper: `post_training/out/paper_comparison.csv`
-(`python post_training/compare_paper.py`).
+(`python post_training/compare_paper.py`). Not computed, by the owner's decision (2026-11-09): Fig. 11 (no GMM fits at other K)
+and Tables 2, 4 and 5 (FID and precision/recall need the Inception-V3 / VGG-16 weights, which are not downloaded).
 
 > **Research-integrity statement.** The paper's S5 detector (its reference [31]) and S6 tracker (refs [32], [33]) are
 > unavailable. This project does **not** reproduce them. S5 and S6 here are **newly designed replacements** that satisfy the
