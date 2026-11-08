@@ -503,7 +503,8 @@ class Engine:
             w = weights_eq10(pi, a, member) if g["weights"] == "eq10" else weights_eq8(pi, member)
             try:
                 r = conditional_sample(m.vae.decoder, m.gmm, w, cond["feature"], cond["lo"], cond["hi"], n, gen,
-                                       thr, batch=min(4000, 64 * n), max_draws=int(g["max_draws"]), keep_images=n)
+                                       thr, batch=min(int(self.vcfg["decisions"]["eval"]["sample_batch"]), 64 * n),
+                                       max_draws=int(g["max_draws"]), keep_images=n)
             except RuntimeError as e:
                 raise audio.InputError(f"too few samples met {cond['label']}: {e}") from e
             images, rate = r["images"], round(float(r["acceptance_rate"]), 5)

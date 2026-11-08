@@ -270,9 +270,20 @@ def analyze_components(cfg, run_id: str, K: int | None = None) -> Path:
     vae, _ = load_trained_vae(d, dev)
     gmm = load_gmm(cfg, run_id, K)
     g = torch.Generator(device=dev)
-    g.manual_seed(int(cfg["decisions"]["train"]["seed"]) + 2)
-    cf = component_features(vae.decoder, gmm, cfg["paper"]["component_samples"], g, cfg["paper"]["contour_threshold"], progress=True)
+    seed = int(cfg["decisions"]["train"]["seed"]) + 2
+    g.manual_seed(seed)
+    batch = int(cfg["decisions"]["eval"]["sample_batch"])
+    t0 = time.time()
+    cf = component_features(vae.decoder, gmm, cfg["paper"]["component_samples"], g, cfg["paper"]["contour_threshold"],
+                            batch=batch, progress=True)
     np.save(out, cf)
+    gd = gmm_dir(cfg, run_id, K)
+    valid = np.isfinite(cf).all(-1)
+    out.with_suffix(".json").write_text(json.dumps({
+        "shape": list(cf.shape), "features": list(FEATURES), "n_per_component": int(cf.shape[1]), "seed": seed, "batch": batch,
+        "threshold": float(cfg["paper"]["contour_threshold"]), "frac_samples_with_contour": float(valid.mean()),
+        "gmm_npz_sha256": sha256_file(gd / "gmm.npz"), "checkpoint_sha256": sha256_file(d / "checkpoints" / "final.pt"),
+        "device": str(dev), "wall_s": round(time.time() - t0, 1), "software": software_versions()}, indent=2), encoding="utf-8")
     return out
 
 
@@ -308,7 +319,8 @@ def eval_conditional(cfg, run_id: str, K: int | None = None, force: bool = False
         unit = fx["ms_per_sample"] if c["feature"] == "L" else fx["hz_per_bin"]
         j = FEATURES.index(c["feature"])
         for wname, w in (("eq10", weights_eq10(pi, a, member)), ("eq8", weights_eq8(pi, member))):
-            s = conditional_sample(vae.decoder, gmm, w, c["feature"], c["lo"], c["hi"], len(X), g, cfg["paper"]["contour_threshold"])
+            s = conditional_sample(vae.decoder, gmm, w, c["feature"], c["lo"], c["hi"], len(X), g, cfg["paper"]["contour_threshold"],
+                                   batch=int(cfg["decisions"]["eval"]["sample_batch"]))
             Y = s["features"]
             if wname == cfg["decisions"]["conditional"]["weights_primary"]:
                 gen_sets[c["no"]] = Y
@@ -412,7 +424,8 @@ def make_figures(cfg, run_id: str, K: int | None = None) -> Path:
             c = cfg["paper"]["table3_conditions"][1]
             a = acceptance_ratios(cf, c["feature"], c["lo"], c["hi"])
             w = weights_eq10(gmm.weights_.cpu().numpy(), a, a > 0)
-            s9 = conditional_sample(vae.decoder, gmm, w, c["feature"], c["lo"], c["hi"], 100, g, thr, batch=2000, keep_images=100)
+            s9 = conditional_sample(vae.decoder, gmm, w, c["feature"], c["lo"], c["hi"], 100, g, thr,
+                                    batch=int(cfg["decisions"]["eval"]["sample_batch"]), keep_images=100)
             fig, axs = plt.subplots(1, 2, figsize=(13, 5))
             for vi in contour_vectors(torch.from_numpy(s9["images"]).to(dev), thr).cpu().numpy():
                 act = np.nonzero(np.isfinite(vi))[0]

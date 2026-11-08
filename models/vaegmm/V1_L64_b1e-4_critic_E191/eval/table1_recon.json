@@ -1,0 +1,11 @@
+{
+  "run_id": "V1_L64_b1e-4_critic_E191",
+  "latent_dim": 64,
+  "beta": 0.0001,
+  "n_images": 63490,
+  "MSE_per_image_sse": 8.521344728972297,
+  "PSNR_dB": 32.83911804354206,
+  "SSIM": 0.9898310847330476,
+  "KL_latent": 860.6347954287869,
+  "convention": "MSE = mean per-image sum of squared errors; PSNR = 10 log10(16384/MSE); z = mu; unrotated training images"
+}

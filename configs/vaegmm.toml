@@ -138,6 +138,10 @@ pr_features         = "torchvision vgg16 IMAGENET1K_V1 fc2 (download pending app
 pr_k                = 3                          # [47] default
 pr_primary_input    = "unthresholded"            # [DECISION] both variants reported
 n_generated         = "n_real"                   # [DECISION] generated set size = real set size (63,490 for encounter 191)
+sample_batch        = 500                        # [DECISION] decoder batch of the component features and the conditional sampler:
+                                                 # fits an 8 GB GPU (3.4 GiB peak; 4,000 needs 7.8 GiB in one activation).
+                                                 # The draws come from one seeded stream per call, so the batch decides which
+                                                 # samples are drawn (not their distribution): it is part of the result hash
 standard_vae_beta   = 1.0                        # [IMPLIED, weak] §IV-D-1 "standard VAEs where beta = 1"
 ldm_one_training_per_T = true                    # [DECISION] beta schedule is defined over T
 
