@@ -19,7 +19,9 @@ up in the Drive run folder). Ridge sensitivity: x10 fitted, x0.1 not feasible (s
 so all four web-demo functions work. Table 1 (L = 64): MSE 8.52, PSNR 32.84 dB, SSIM 0.9898, KL 860.6, against the paper's 0.5778,
 44.53 dB, 0.9861, 43.19; only SSIM is reproduced (likely causes in spec §3.10). Table 3 / Fig. 12: the Fig. 12 structure is
 reproduced (every diagonal entry is its row's minimum), but recall, precision and F1 are lower than the paper's (F1 75-83 % vs
-90-94 %). Figs. 7-10 are made (`figures/`). Side by side with the paper: `post_training/out/paper_comparison.csv`
+90-94 %). Figs. 7-10 are made (`figures/`). Table 6: decoder size matches the paper (368,097 parameters, 557.3 MFLOPs);
+with the paper's 0.5 s pause the laptop GPU wakes from idle on every trial, so a warm supplement is reported too (B = 16:
+0.120 ms per image warm vs the paper's 0.11 ms). Side by side with the paper: `post_training/out/paper_comparison.csv`
 (`python post_training/compare_paper.py`).
 
 > **Research-integrity statement.** The paper's S5 detector (its reference [31]) and S6 tracker (refs [32], [33]) are

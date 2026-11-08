@@ -349,6 +349,11 @@ def eval_cost(cfg, run_id: str, K: int | None = None, force: bool = False) -> Pa
     from .models import Decoder
     res = {"run_id": run_id, "decoder_params": n_params(vae.decoder),
            "decoder_table6_flops": table6_flops(Decoder(spec["latent_dim"]), (spec["latent_dim"],)), "device": str(dev),
+           "gpu_name": torch.cuda.get_device_name(dev) if dev.type == "cuda" else None,
+           "torch_flags": {"cudnn_benchmark": torch.backends.cudnn.benchmark, "cudnn_deterministic": torch.backends.cudnn.deterministic,
+                           "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+                           "matmul_tf32": torch.backends.cuda.matmul.allow_tf32},
+           "software": software_versions(),
            "protocol": "250 trials, first 50 excluded, 0.5 s between trials; per-image latency = batch time / B"}
     g = torch.Generator(device=dev)
     g.manual_seed(0)

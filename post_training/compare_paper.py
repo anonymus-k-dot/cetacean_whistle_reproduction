@@ -31,6 +31,9 @@ PAPER_T3 = {1: (30593, 1.0075, 0.0899, 98.94, 83.95, 90.83), 2: (8202, 1.7744, 1
             9: (22851, 2.9156, 0.3384, 98.69, 84.93, 91.29), 10: (19354, 3.9938, 0.6993, 98.71, 84.55, 91.08),
             11: (27062, 3.5906, 0.2902, 98.74, 86.04, 91.95), 12: (10712, 5.6063, 1.1084, 98.17, 90.84, 94.36),
             13: (48642, 3.5156, 0.1313, 98.93, 82.66, 90.07)}
+# Table 6, VAE-GMM L = 64 (page 14): params, FLOPs, inference latency (B = 1), per-image latency at B = 16 and B = 32
+PAPER_T6 = {"decoder_params": 368e3, "decoder_FLOPs": 557e6, "B1_latency_ms": 1.7, "B16_per_image_ms": 0.11,
+            "B32_per_image_ms": 0.054}
 
 
 def main() -> int:
@@ -61,6 +64,31 @@ def main() -> int:
     off = [z[i][j] for i in range(len(z)) for j in range(len(z)) if i != j]
     print(f"\nFig. 12: diagonal ln FFD {min(diag):.2f} .. {max(diag):.2f}; off-diagonal {min(off):.2f} .. {max(off):.2f}; "
           f"rows whose diagonal is the row minimum: {sum(z[i][i] == min(z[i]) for i in range(len(z)))} of {len(z)}")
+    t6p = ev / "table6_cost.json"
+    if t6p.exists():
+        t6 = json.loads(t6p.read_text(encoding="utf-8"))
+        print(f"\nTable 6 (ours on {t6.get('gpu_name') or t6['device']}; the paper does not name its timing GPU)")
+        print("  metric                 decoder only   GMM sampling + decoder   paper")
+        ours = {"decoder_params": (t6["decoder_params"], None), "decoder_FLOPs": (t6["decoder_table6_flops"], None)}
+        for B, key in ((1, "B1_latency_ms"), (16, "B16_per_image_ms"), (32, "B32_per_image_ms")):
+            what = "batch_s" if B == 1 else "per_image_s"
+            ours[key] = tuple(1e3 * t6[f"B{B}_{m}_{what}"] for m in ("decoder_only", "gmm_sampling_plus_decoder"))
+        for key, (a, b) in ours.items():
+            print(f"  {key:22s} {a:12.4g}   {'' if b is None else f'{b:12.4g}':>22s}   {PAPER_T6[key]:.4g}")
+            rows.append({"table": "6", "row": "VAE-GMM L=64 decoder only", "metric": key, "ours": a, "paper": PAPER_T6[key]})
+            if b is not None:
+                rows.append({"table": "6", "row": "VAE-GMM L=64 GMM sampling + decoder", "metric": key, "ours": b,
+                             "paper": PAPER_T6[key]})
+        wp = OUT / "table6_warm.json"
+        if wp.exists():
+            w6 = json.loads(wp.read_text(encoding="utf-8"))
+            print("  warm GPU, no pause (post_training/table6_warm.py):")
+            for B, key in ((1, "B1_latency_ms"), (16, "B16_per_image_ms"), (32, "B32_per_image_ms")):
+                what = "batch_s" if B == 1 else "per_image_s"
+                a, b = (1e3 * w6[f"B{B}_{m}_{what}"] for m in ("decoder_only", "gmm_sampling_plus_decoder"))
+                print(f"  {key:22s} {a:12.4g}   {b:22.4g}   {PAPER_T6[key]:.4g}")
+                for row, v in (("decoder only, warm", a), ("GMM sampling + decoder, warm", b)):
+                    rows.append({"table": "6", "row": f"VAE-GMM L=64 {row}", "metric": key, "ours": v, "paper": PAPER_T6[key]})
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "paper_comparison.csv", "w", newline="", encoding="utf-8") as f:
         wr = csv.DictWriter(f, fieldnames=["table", "row", "metric", "ours", "paper"])

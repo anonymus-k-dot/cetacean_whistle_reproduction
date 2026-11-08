@@ -81,3 +81,17 @@ table,row,metric,ours,paper
 3,condition 13 (f_end 70-80),recall_pct,91.8338777414839,98.93
 3,condition 13 (f_end 70-80),precision_pct,74.3163789080728,82.66
 3,condition 13 (f_end 70-80),F1_pct,82.1516787570001,90.07
+6,VAE-GMM L=64 decoder only,decoder_params,368097,368000.0
+6,VAE-GMM L=64 decoder only,decoder_FLOPs,557318144,557000000.0
+6,VAE-GMM L=64 decoder only,B1_latency_ms,1.7809480000232725,1.7
+6,VAE-GMM L=64 GMM sampling + decoder,B1_latency_ms,2.213041499967403,1.7
+6,VAE-GMM L=64 decoder only,B16_per_image_ms,2.981057187500369,0.11
+6,VAE-GMM L=64 GMM sampling + decoder,B16_per_image_ms,3.1846431562465227,0.11
+6,VAE-GMM L=64 decoder only,B32_per_image_ms,1.2381381874997999,0.054
+6,VAE-GMM L=64 GMM sampling + decoder,B32_per_image_ms,1.307294531249994,0.054
+6,"VAE-GMM L=64 decoder only, warm",B1_latency_ms,0.5191609999928914,1.7
+6,"VAE-GMM L=64 GMM sampling + decoder, warm",B1_latency_ms,0.8817825000960511,1.7
+6,"VAE-GMM L=64 decoder only, warm",B16_per_image_ms,0.11995412500198199,0.11
+6,"VAE-GMM L=64 GMM sampling + decoder, warm",B16_per_image_ms,0.13552562500109389,0.11
+6,"VAE-GMM L=64 decoder only, warm",B32_per_image_ms,0.11468343750024701,0.054
+6,"VAE-GMM L=64 GMM sampling + decoder, warm",B32_per_image_ms,0.12367464062549517,0.054
