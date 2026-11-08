@@ -17,7 +17,10 @@ and did not resume, so the final model is epoch 101 (`checkpoints/final.pt` = `l
 is fitted at K = 3,000 (`gmm_K3000/`: converged in 111 iterations, post-fit check passed; `gmm.npz` is not in git, it is backed
 up in the Drive run folder). Ridge sensitivity: x10 fitted, x0.1 not feasible (spec §3.5). The component features are computed,
 so all four web-demo functions work. Table 1 (L = 64): MSE 8.52, PSNR 32.84 dB, SSIM 0.9898, KL 860.6, against the paper's 0.5778,
-44.53 dB, 0.9861, 43.19; only SSIM is reproduced (likely causes in spec §3.10). No other evaluation result exists yet.
+44.53 dB, 0.9861, 43.19; only SSIM is reproduced (likely causes in spec §3.10). Table 3 / Fig. 12: the Fig. 12 structure is
+reproduced (every diagonal entry is its row's minimum), but recall, precision and F1 are lower than the paper's (F1 75-83 % vs
+90-94 %). Figs. 7-10 are made (`figures/`). Side by side with the paper: `post_training/out/paper_comparison.csv`
+(`python post_training/compare_paper.py`).
 
 > **Research-integrity statement.** The paper's S5 detector (its reference [31]) and S6 tracker (refs [32], [33]) are
 > unavailable. This project does **not** reproduce them. S5 and S6 here are **newly designed replacements** that satisfy the

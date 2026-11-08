@@ -453,6 +453,26 @@ def make_figures(cfg, run_id: str, K: int | None = None) -> Path:
             axs[r, 1].set(xlim=(0, 128), ylim=(0, 128), title=f"k^ = {k}")
         fig.savefig(out / "fig10_map.png", dpi=80)
         plt.close(fig)
+    # Fig. 12: ln FFD between real whistles of condition i (rows) and generated whistles of condition j (columns)
+    t3 = d / "eval" / f"table3_fig12_K{K}.json"
+    if t3.exists():
+        z = json.loads(t3.read_text(encoding="utf-8"))["fig12_lnFFD"]
+        Z, nos = np.array(z["Z"]), z["rows_real_condition"]
+        fig, ax = plt.subplots(figsize=(8, 7))
+        im = ax.imshow(Z, cmap="gray", vmin=min(-3.0, float(Z.min())), vmax=max(8.0, float(Z.max())))
+        for i in range(len(nos)):
+            for j in range(len(nos)):
+                v = Z[i, j]
+                ax.text(j, i, f"{v:.2g}" if abs(v) < 1 else f"{v:.1f}", ha="center", va="center", fontsize=7,
+                        color="white" if v < 0.5 * (im.norm.vmin + im.norm.vmax) else "black")
+        ax.set_xticks(range(len(nos)), nos)
+        ax.set_yticks(range(len(nos)), nos)
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position("top")
+        ax.set(xlabel="Condition index (generated data)", ylabel="Condition index (real data)")
+        fig.colorbar(im, ax=ax, fraction=0.046)
+        fig.savefig(out / "fig12_lnFFD.png", dpi=90)
+        plt.close(fig)
     print("figures in", out, flush=True)
     return out
 
